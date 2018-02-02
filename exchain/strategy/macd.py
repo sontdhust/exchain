@@ -13,8 +13,8 @@ def analyse_macd(histograms, situations):
     macd_range = sum([abs(m - macd_mean) for m in macds]) / len(macds) * 2
     fluctuation = macds[-1] - macd_mean
     for situation in situations:
-        ticks_count = situation['monotonic_ticks_count']
-        last_differences = differences[-ticks_count:]
+        period = situation['monotonic_period']
+        last_differences = differences[-period:]
         monotonicity = check_monotonicity(last_differences)
         if monotonicity is None:
             continue

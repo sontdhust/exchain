@@ -30,13 +30,13 @@ def trade(interval):
             ticker['exchange'],
             ticker['pair'],
             interval,
-            read_config('api.data_fetcher.ticks_count')
+            read_config('api.data_fetcher.period')
         )
         if len(prices) == 0:
             continue
         macd_histograms = calculate_macd_histograms(prices)
         position = analyse_macd(
-            macd_histograms[-read_config('strategy.macd.ticks_count'):],
+            macd_histograms[-read_config('strategy.macd.period'):],
             read_config('strategy.macd.situations')
         )
         if position != 'hold':

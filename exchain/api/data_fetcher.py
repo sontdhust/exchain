@@ -6,17 +6,17 @@ import urllib2
 import time
 import json
 
-def fetch_prices(exchange, pair, interval, ticks_count):
+def fetch_prices(exchange, pair, interval, period):
     """
     Fetch prices
     """
     try:
-        candles = fetch_candles(exchange, pair, [interval], ticks_count)
+        candles = fetch_candles(exchange, pair, [interval], period)
     except urllib2.URLError:
         return []
     return [{'time': c[0], 'value': c[4]} for c in candles[str(interval)]]
 
-def fetch_candles(exchange, pair, intervals, ticks_count):
+def fetch_candles(exchange, pair, intervals, period):
     """
     Fetch candles
     """
@@ -27,5 +27,5 @@ def fetch_candles(exchange, pair, intervals, ticks_count):
         + pair + '/ohlc'
         + '?periods=' + ','.join([str(i) for i in intervals])
         + '&before=' + str(now)
-        + '&after=' + str(now - ticks_count * max(intervals))
+        + '&after=' + str(now - period * max(intervals))
     ).read())['result']

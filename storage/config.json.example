@@ -2,7 +2,7 @@
     "api": {
         "data_fetcher": {
             "interval": 180,
-            "ticks_count": 300
+            "period": 300
         }
     },
     "storage": {
@@ -17,9 +17,9 @@
     },
     "strategy": {
         "macd": {
-            "ticks_count": 120,
+            "period": 120,
             "situations": [
-                {"fluctuation_domain": null, "monotonic_ticks_count": 1}
+                {"fluctuation_domain": null, "monotonic_period": 1}
             ]
         }
     }
