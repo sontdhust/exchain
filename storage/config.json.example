@@ -1,6 +1,28 @@
 {
     "api": {
-        "interval": 180,
-        "ticks_count": 400
+        "data_fetcher": {
+            "interval": 180,
+            "ticks_count": 300
+        }
+    },
+    "storage": {
+        "database": {
+            "mysql": {
+                "host": "",
+                "user": "",
+                "password": "",
+                "database": "exchain"
+            }
+        }
+    },
+    "strategy": {
+        "macd": {
+            "ticks_count": 120,
+            "situations": [
+                {"fluctuation_bound": null, "monotonic_ticks_count": 1}
+            ],
+            "monotonicity_variation": 0,
+            "difference_dispersion": 1
+        }
     }
 }

@@ -15,7 +15,7 @@ def fetch_prices(exchange, pair, interval, ticks_count):
 
 def fetch_candles(exchange, pair, intervals, ticks_count):
     """
-    Fetch Candles
+    Fetch candles
     """
     now = int(time.time())
     return json.loads(urllib2.urlopen(

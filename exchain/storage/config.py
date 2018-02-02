@@ -1,5 +1,5 @@
 """
-Reader
+Config
 """
 
 import os.path

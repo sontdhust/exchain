@@ -2,22 +2,57 @@
 Exchain
 """
 
-from config import read_config
+import sched
+import time
+from storage import read_config, connect_database, select_tickers, close_database, write_log
 from api import fetch_prices
 from indicator import calculate_macd_histograms
+from strategy import analyse_macd
+
+SCHEDULER = sched.scheduler(time.time, time.sleep)
 
 def main():
     """
     Main function
     """
-    prices = fetch_prices(
-        exchange='bitfinex',
-        pair='btcusd',
-        interval=read_config('api.interval'),
-        ticks_count=read_config('api.ticks_count')
-    )
-    macd_histograms = calculate_macd_histograms(prices)
-    print macd_histograms
+    interval = read_config('api.data_fetcher.interval')
+    connect_database(read_config('storage.database.mysql'))
+    SCHEDULER.enter(delay(interval), 1, trade, (interval,))
+    SCHEDULER.run()
+    close_database()
+
+def trade(interval):
+    """
+    Trade
+    """
+    for ticker in select_tickers():
+        prices = fetch_prices(
+            ticker['exchange'],
+            ticker['pair'],
+            interval,
+            read_config('api.data_fetcher.ticks_count')
+        )
+        macd_histograms = calculate_macd_histograms(prices)
+        position = analyse_macd(
+            macd_histograms[-read_config('strategy.macd.ticks_count'):],
+            read_config('strategy.macd.situations'),
+            read_config('strategy.macd.monotonicity_variation'),
+            read_config('strategy.macd.difference_dispersion')
+        )
+        if position != 'hold':
+            write_log(
+                ticker['exchange'] + '_' + ticker['pair'],
+                time.strftime('%d %H:%M:%S', time.localtime(macd_histograms[-1]['time'])) + '; '
+                + position + '; '
+                + str(macd_histograms[-1]['price'])
+            )
+    SCHEDULER.enter(delay(interval), 1, trade, (interval,))
+
+def delay(interval):
+    """
+    Delay
+    """
+    return interval - int(time.time()) % interval
 
 if __name__ == "__main__":
     main()
