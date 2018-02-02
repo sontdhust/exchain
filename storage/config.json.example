@@ -19,10 +19,11 @@
         "macd": {
             "ticks_count": 120,
             "situations": [
-                {"fluctuation_bound": null, "monotonic_ticks_count": 1}
+                {"fluctuation_domain": null, "monotonic_ticks_count": 1}
             ],
-            "monotonicity_variation": 0,
-            "difference_dispersion": 1
+            "monotone_uncertainty": 0,
+            "fluctuation_uncertainty": 1,
+            "difference_dispersity": 1
         }
     }
 }

@@ -32,12 +32,15 @@ def trade(interval):
             interval,
             read_config('api.data_fetcher.ticks_count')
         )
+        if len(prices) == 0:
+            continue
         macd_histograms = calculate_macd_histograms(prices)
         position = analyse_macd(
             macd_histograms[-read_config('strategy.macd.ticks_count'):],
             read_config('strategy.macd.situations'),
-            read_config('strategy.macd.monotonicity_variation'),
-            read_config('strategy.macd.difference_dispersion')
+            read_config('strategy.macd.monotone_uncertainty'),
+            read_config('strategy.macd.fluctuation_uncertainty'),
+            read_config('strategy.macd.difference_dispersity')
         )
         if position != 'hold':
             write_log(

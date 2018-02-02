@@ -10,7 +10,10 @@ def fetch_prices(exchange, pair, interval, ticks_count):
     """
     Fetch prices
     """
-    candles = fetch_candles(exchange, pair, [interval], ticks_count)
+    try:
+        candles = fetch_candles(exchange, pair, [interval], ticks_count)
+    except urllib2.URLError:
+        return []
     return [{'time': c[0], 'value': c[4]} for c in candles[str(interval)]]
 
 def fetch_candles(exchange, pair, intervals, ticks_count):
