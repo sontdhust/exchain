@@ -1,0 +1,8 @@
+# Python ignore files
+*.pyc
+
+# Project ignore files
+storage/*
+!storage/*.example
+
+/tmp

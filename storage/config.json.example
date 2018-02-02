@@ -1,0 +1,6 @@
+{
+    "api": {
+        "interval": 180,
+        "ticks_count": 400
+    }
+}
