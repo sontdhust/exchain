@@ -19,6 +19,10 @@
         "macd": {
             "period": 120,
             "monotonic_period": 1
+        },
+        "rsi": {
+            "oversold_level": 0,
+            "overbought_level": 100
         }
     },
     "strategy": {

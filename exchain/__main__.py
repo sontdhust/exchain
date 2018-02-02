@@ -10,8 +10,8 @@ from storage import (
     select_previous_trade, insert_trade, select_unexecuted_trades, update_trade
 )
 from api import fetch_prices, notify_trades, bitflyer_trade
-from indicator import calculate_macd_histograms
-from analysis import analyze_macd
+from indicator import calculate_macd_histograms, calculate_rsi
+from analysis import analyze_macd, analyze_rsi
 from strategy import decide_side, check_side_change
 
 TRADE_TYPE = 'market'
@@ -31,10 +31,16 @@ def main():
         )
         if len(prices) == 0:
             continue
-        side = analyze_macd(
+        macd_side = analyze_macd(
             calculate_macd_histograms(prices)[-read_config('analysis.macd.period'):],
             read_config('analysis.macd.monotonic_period')
         )
+        rsi_side = analyze_rsi(
+            calculate_rsi(prices),
+            read_config('strategy.rsi.oversold_level'),
+            read_config('strategy.rsi.overbought_level')
+        )
+        side = None if macd_side != rsi_side else macd_side
         update_ticker(ticker['id'], side, prices[-1]['close'])
         tickers[ticker['id']] = {
             'priority': ticker['priority'],
