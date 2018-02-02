@@ -1,0 +1,26 @@
+{
+    "api": {
+        "data_fetcher": {
+            "interval": 180,
+            "period": 300
+        }
+    },
+    "storage": {
+        "database": {
+            "mysql": {
+                "host": "",
+                "user": "",
+                "password": "",
+                "database": "exchain"
+            }
+        }
+    },
+    "strategy": {
+        "macd": {
+            "period": 120,
+            "situations": [
+                {"fluctuation_domain": null, "monotonic_period": 1}
+            ]
+        }
+    }
+}
