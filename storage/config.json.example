@@ -18,9 +18,9 @@
     "strategy": {
         "macd": {
             "period": 120,
-            "situations": [
-                {"fluctuation_domain": null, "monotonic_period": 1}
-            ]
+            "difference_monotonic_period": 1,
+            "difference_period": 1,
+            "macd_dispersity": 1
         }
     }
 }

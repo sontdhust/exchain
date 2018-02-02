@@ -37,7 +37,9 @@ def trade(interval):
         macd_histograms = calculate_macd_histograms(prices)
         position = analyse_macd(
             macd_histograms[-read_config('strategy.macd.period'):],
-            read_config('strategy.macd.situations')
+            read_config('strategy.macd.difference_monotonic_period'),
+            read_config('strategy.macd.difference_period'),
+            read_config('strategy.macd.macd_dispersity')
         )
         if position != 'hold':
             write_log(

@@ -2,45 +2,61 @@
 MACD
 """
 
-def analyse_macd(histograms, situations):
+MAXIMUM = True
+
+def analyse_macd(histograms, difference_monotonic_period, difference_period, macd_dispersity):
     """
     Analyse MACD
     """
-    position = 'hold'
     macds = [h['macd'] for h in histograms]
-    differences = [h['macd'] - h['signal'] for h in histograms]
     macd_mean = sum(macds) / len(macds)
-    macd_range = sum([abs(m - macd_mean) for m in macds]) / len(macds) * 2
-    fluctuation = macds[-1] - macd_mean
-    for situation in situations:
-        period = situation['monotonic_period']
-        last_differences = differences[-period:]
-        monotonicity = check_monotonicity(last_differences)
-        if monotonicity is None:
-            continue
-        relative_fluctuation = fluctuation * (-1 if monotonicity else 1)
-        fluctuation_domain = situation['fluctuation_domain']
-        if fluctuation_domain is not None:
-            is_reversing = (
-                '<' in fluctuation_domain
-                and relative_fluctuation < macd_range * float(fluctuation_domain.replace('<', ''))
-            )
-            is_reversing = is_reversing or (
-                '~' in fluctuation_domain
-                and relative_fluctuation > macd_range * float(fluctuation_domain.split('~')[0])
-                and relative_fluctuation < macd_range * float(fluctuation_domain.split('~')[1])
-            )
-            is_reversing = is_reversing or (
-                '>' in fluctuation_domain
-                and relative_fluctuation > macd_range * float(fluctuation_domain.replace('>', ''))
-            )
-            if is_reversing:
-                position = 'buy' if monotonicity else 'sell'
-                break
+    macd_variance = sum([(m - macd_mean) ** 2 for m in macds]) / len(macds)
+    macd_standard_deviation = macd_variance ** 0.5
+    differences = [h['macd'] - h['signal'] for h in histograms]
+    monotonicity = check_monotonicity(differences[-difference_monotonic_period:])
+    if monotonicity is None or monotonicity != (macds[-1] > macds[-difference_monotonic_period]):
+        return 'hold'
+    else:
+        extremum = find_previous_extremum(
+            macds, differences, monotonicity is True, difference_period
+        )
+        if extremum is None:
+            return 'hold'
         else:
-            position = 'buy' if monotonicity else 'sell'
-            break
-    return position
+            if ((macds[-1] - extremum) * (-1 if monotonicity else 1)
+                    > macd_standard_deviation * macd_dispersity):
+                return 'buy' if monotonicity else 'sell'
+            else:
+                return 'hold'
+
+def find_previous_extremum(macds, differences, extremum_type, difference_period):
+    """
+    Find previous extremum
+    """
+    extremum = None
+    is_started_finding = False
+    count = 0
+    for i in range(len(differences) - 1, -1, -1):
+        if not (extremum_type is MAXIMUM) ^ (differences[i] < 0):
+            if extremum is None:
+                is_started_finding = True
+                continue
+            else:
+                if count < difference_period:
+                    extremum = None
+                    count = 0
+                else:
+                    break
+        else:
+            if not is_started_finding:
+                continue
+            macd = macds[i]
+            count += 1
+            if extremum is None:
+                extremum = macd
+            else:
+                extremum = max(extremum, macd) if extremum_type is MAXIMUM else min(extremum, macd)
+    return extremum
 
 def check_monotonicity(period):
     """
