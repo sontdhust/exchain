@@ -2,9 +2,7 @@
 MACD
 """
 
-def analyse_macd(
-        histograms, situations,
-        monotone_uncertainty, fluctuation_uncertainty, difference_dispersity):
+def analyse_macd(histograms, situations):
     """
     Analyse MACD
     """
@@ -14,18 +12,11 @@ def analyse_macd(
     macd_mean = sum(macds) / len(macds)
     macd_range = sum([abs(m - macd_mean) for m in macds]) / len(macds) * 2
     fluctuation = macds[-1] - macd_mean
-    difference_mean = sum(differences) / len(differences)
     for situation in situations:
         ticks_count = situation['monotonic_ticks_count']
         last_differences = differences[-ticks_count:]
-        monotonicity = check_monotonicity(last_differences, monotone_uncertainty)
-        previous_fluctuation = macds[-ticks_count] - macd_mean
-        last_difference_mean = sum(last_differences) / len(last_differences)
-        if (monotonicity is None
-                or monotonicity != (fluctuation > previous_fluctuation)
-                or (abs(fluctuation - previous_fluctuation)
-                    <= abs(previous_fluctuation) * fluctuation_uncertainty)
-                or abs(last_difference_mean) < abs(difference_mean) * (1 - difference_dispersity)):
+        monotonicity = check_monotonicity(last_differences)
+        if monotonicity is None:
             continue
         relative_fluctuation = fluctuation * (-1 if monotonicity else 1)
         fluctuation_domain = situation['fluctuation_domain']
@@ -51,7 +42,7 @@ def analyse_macd(
             break
     return position
 
-def check_monotonicity(period, monotone_uncertainty):
+def check_monotonicity(period):
     """
     Check monotonicity
     """
@@ -64,11 +55,10 @@ def check_monotonicity(period, monotone_uncertainty):
         if i == 0:
             previous_value = value
             continue
-        if abs(value - previous_value) > abs(previous_value) * monotone_uncertainty:
-            current_monotonicity = True if value > previous_value else False
-            previous_value = value
-            if monotonicity is None:
-                monotonicity = current_monotonicity
-            elif monotonicity != current_monotonicity:
-                return None
+        current_monotonicity = True if value > previous_value else False
+        previous_value = value
+        if monotonicity is None:
+            monotonicity = current_monotonicity
+        elif monotonicity != current_monotonicity:
+            return None
     return monotonicity

@@ -20,10 +20,7 @@
             "ticks_count": 120,
             "situations": [
                 {"fluctuation_domain": null, "monotonic_ticks_count": 1}
-            ],
-            "monotone_uncertainty": 0,
-            "fluctuation_uncertainty": 1,
-            "difference_dispersity": 1
+            ]
         }
     }
 }
