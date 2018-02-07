@@ -55,18 +55,20 @@ def select_assets():
     Select assets
     """
     query = (
-        'SELECT assets.id, exchange, pair, price, amount '
+        'SELECT assets.id, slack_webhook_url, exchange, pair, price, amount '
         'FROM assets '
+        'JOIN users ON assets.user_id = users.id '
         'JOIN tickers ON assets.ticker_id = tickers.id '
         'WHERE priority > 0'
     )
     DATABASE['cursor'].execute(query)
     result = [{
         'id': r[0],
-        'exchange': r[1],
-        'pair': r[2],
-        'price': r[3],
-        'amount': r[4]
+        'slack_webhook_url': r[1],
+        'exchange': r[2],
+        'pair': r[3],
+        'price': r[4],
+        'amount': r[5]
     } for r in DATABASE['cursor'].fetchall()]
     return result
 
