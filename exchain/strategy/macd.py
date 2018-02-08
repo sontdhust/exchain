@@ -2,79 +2,104 @@
 MACD
 """
 
+INCREASING = True
+DECREASING = False
 MAXIMUM = True
+MINIMUM = False
+UP = True
+DOWN = False
+BULL = True
+BEAR = False
 
-def analyse_macd(histograms, difference_monotonic_period, difference_period, macd_dispersity):
+def analyse_macd(histograms, movement_period, trend_strength_disparity):
     """
     Analyse MACD
     """
-    macds = [h['macd'] for h in histograms]
-    macd_mean = sum(macds) / len(macds)
-    macd_variance = sum([(m - macd_mean) ** 2 for m in macds]) / len(macds)
-    macd_standard_deviation = macd_variance ** 0.5
-    differences = [h['macd'] - h['signal'] for h in histograms]
-    monotonicity = check_monotonicity(differences[-difference_monotonic_period:])
-    if monotonicity is None or monotonicity != (macds[-1] > macds[-difference_monotonic_period]):
-        return 'hold'
-    else:
-        extremum = find_previous_extremum(
-            macds, differences, monotonicity is True, difference_period
-        )
-        if extremum is None:
-            return 'hold'
-        else:
-            if ((macds[-1] - extremum) * (-1 if monotonicity else 1)
-                    > macd_standard_deviation * macd_dispersity):
-                return 'buy' if monotonicity else 'sell'
-            else:
-                return 'hold'
+    extrema = find_extrema(histograms)
+    sentiment = find_sentiment(extrema, movement_period, trend_strength_disparity)
+    return 'hold' if sentiment is None else ('buy' if sentiment is BULL else 'sell')
 
-def find_previous_extremum(macds, differences, extremum_type, difference_period):
+def find_extrema(histograms):
     """
-    Find previous extremum
+    Find extrema
     """
-    extremum = None
-    is_started_finding = False
-    count = 0
-    for i in range(len(differences) - 1, -1, -1):
-        if not (extremum_type is MAXIMUM) ^ (differences[i] < 0):
-            if extremum is None:
-                is_started_finding = True
-                continue
-            else:
-                if count < difference_period:
-                    extremum = None
-                    count = 0
-                else:
-                    break
-        else:
-            if not is_started_finding:
-                continue
-            macd = macds[i]
-            count += 1
-            if extremum is None:
-                extremum = macd
-            else:
-                extremum = max(extremum, macd) if extremum_type is MAXIMUM else min(extremum, macd)
-    return extremum
+    movements = []
+    movement = []
+    for i in range(len(histograms) - 1, -1, -1):
+        divergence = histograms[i]['macd'] - histograms[i]['signal']
+        if len(movement) != 0 and divergence * movement[-1]['divergence'] < 0:
+            movements.insert(0, movement)
+            movement = []
+        movement.insert(0, {
+            'macd': histograms[i]['macd'],
+            'divergence': divergence,
+            'price': histograms[i]['price']
+        })
+    def find_extremum(movement):
+        """
+        Find extremum
+        """
+        extremum_type = MAXIMUM if movement[-1]['divergence'] > 0 else MINIMUM
+        return {
+            'type': extremum_type,
+            'period': len(movement),
+            'macd': ext([r['macd'] for r in movement], extremum_type),
+            'price': ext([r['price'] for r in movement], extremum_type),
+        }
+    return [find_extremum(m) for m in movements]
 
-def check_monotonicity(period):
+def find_sentiment(extrema, movement_period, trend_strength_disparity):
     """
-    Check monotonicity
+    Find sentiment
     """
-    monotonicity = None
-    previous_value = None
-    if len(period) < 2:
-        return monotonicity
-    for i in range(0, len(period)):
-        value = period[i]
-        if i == 0:
-            previous_value = value
+    essential_extrema = []
+    extremum = {}
+    for i in range(len(extrema) - 1, -1, -1):
+        if extrema[i]['period'] < movement_period:
             continue
-        current_monotonicity = True if value > previous_value else False
-        previous_value = value
-        if monotonicity is None:
-            monotonicity = current_monotonicity
-        elif monotonicity != current_monotonicity:
-            return None
-    return monotonicity
+        else:
+            if len(extremum) != 0:
+                if extremum['type'] == extrema[i]['type']:
+                    extremum = {
+                        'type': extremum['type'],
+                        'macd': ext([extremum['macd'], extrema[i]['macd']], extremum['type']),
+                        'price': ext([extremum['price'], extrema[i]['price']], extremum['type'])
+                    }
+                    continue
+                else:
+                    essential_extrema.insert(0, extremum)
+            extremum = {
+                'type': extrema[i]['type'],
+                'macd': extrema[i]['macd'],
+                'price': extrema[i]['price'],
+            }
+    essential_extrema.insert(0, extremum)
+    if len(essential_extrema) < 3:
+        return None
+    def find_trend(first_extremum, second_extremum):
+        """
+        Find trend
+        """
+        return {
+            'trend': UP if (
+                first_extremum['type'] is MINIMUM and second_extremum['type'] is MAXIMUM
+            ) else (DOWN if (
+                first_extremum['type'] is MAXIMUM and second_extremum['type'] is MINIMUM
+            ) else None),
+            'strength': (
+                abs(first_extremum['price'] - second_extremum['price'])
+                / abs(first_extremum['macd'] - second_extremum['macd'])
+            )
+        }
+    first_trend = find_trend(essential_extrema[-3], essential_extrema[-2])
+    second_trend = find_trend(essential_extrema[-2], essential_extrema[-1])
+    if first_trend['strength'] < (1 - trend_strength_disparity) * second_trend['strength']:
+        return BULL if second_trend['trend'] is UP else BEAR
+    if second_trend['strength'] < (1 - trend_strength_disparity) * first_trend['strength']:
+        return BULL if first_trend['trend'] is UP else BEAR
+
+def ext(series, extremum_type):
+    """
+    Ext
+    """
+    return max(series) if extremum_type is MAXIMUM else min(series)

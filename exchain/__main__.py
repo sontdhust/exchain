@@ -18,7 +18,7 @@ SCHEDULER = sched.scheduler(time.time, time.sleep)
 
 def main():
     """
-    Main function
+    Main
     """
     interval = read_config('api.data_fetcher.interval')
     connect_database(read_config('storage.database.mysql'))
@@ -42,9 +42,8 @@ def trade(interval):
         macd_histograms = calculate_macd_histograms(prices)
         side = analyse_macd(
             macd_histograms[-read_config('strategy.macd.period'):],
-            read_config('strategy.macd.difference_monotonic_period'),
-            read_config('strategy.macd.difference_period'),
-            read_config('strategy.macd.macd_dispersity')
+            read_config('strategy.macd.movement_period'),
+            read_config('strategy.macd.trend_strength_disparity')
         )
         price = macd_histograms[-1]['price']
         amount = 0
