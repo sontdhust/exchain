@@ -18,8 +18,11 @@
     "strategy": {
         "macd": {
             "period": 120,
+            "monotonic_period": 1,
             "movement_period": 1,
-            "trend_strength_disparity": 0
+            "situations": [
+                {"macd_dispersity_domain": null, "trend_strength_disparity_domain": null}
+            ]
         }
     }
 }

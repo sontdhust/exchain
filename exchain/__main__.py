@@ -42,8 +42,9 @@ def trade(interval):
         macd_histograms = calculate_macd_histograms(prices)
         side = analyse_macd(
             macd_histograms[-read_config('strategy.macd.period'):],
+            read_config('strategy.macd.monotonic_period'),
             read_config('strategy.macd.movement_period'),
-            read_config('strategy.macd.trend_strength_disparity')
+            read_config('strategy.macd.situations')
         )
         price = macd_histograms[-1]['price']
         amount = 0
