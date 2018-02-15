@@ -20,9 +20,7 @@
             "period": 120,
             "monotonic_period": 1,
             "movement_period": 1,
-            "situations": [
-                {"macd_dispersity_domain": null, "trend_strength_disparity_domain": null}
-            ]
+            "trend_strength_disparity": 1
         }
     }
 }

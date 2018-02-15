@@ -44,7 +44,7 @@ def trade(interval):
             macd_histograms[-read_config('strategy.macd.period'):],
             read_config('strategy.macd.monotonic_period'),
             read_config('strategy.macd.movement_period'),
-            read_config('strategy.macd.situations')
+            read_config('strategy.macd.trend_strength_disparity')
         )
         price = macd_histograms[-1]['price']
         amount = 0
