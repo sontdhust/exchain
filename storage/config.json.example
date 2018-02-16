@@ -19,8 +19,7 @@
         "macd": {
             "period": 120,
             "monotonic_period": 1,
-            "movement_period": 1,
-            "trend_strength_disparity": 1
+            "movement_period": 1
         }
     }
 }

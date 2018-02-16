@@ -6,10 +6,8 @@ INCREASING = True
 DECREASING = False
 MAXIMUM = True
 MINIMUM = False
-UP = True
-DOWN = False
 
-def analyse_macd(histograms, monotonic_period, movement_period, trend_strength_disparity):
+def analyse_macd(histograms, monotonic_period, movement_period):
     """
     Analyse MACD
     """
@@ -18,12 +16,13 @@ def analyse_macd(histograms, monotonic_period, movement_period, trend_strength_d
     monotonicity = check_monotonicity(divergences[-monotonic_period:])
     extrema = find_extrema(histograms, movement_period)
     if (monotonicity is None
-            or monotonicity != check_monotonicity(macds[-monotonic_period:])
-            or len(extrema) < 3):
+            or monotonicity != check_monotonicity(macds[-monotonic_period:])):
         return 'hold'
-    disparity = find_trend_strength_disparity(extrema) ** (1 if monotonicity is INCREASING else -1)
-    if disparity > trend_strength_disparity:
-        return 'buy' if monotonicity is INCREASING else 'sell'
+    is_increasing = monotonicity is INCREASING
+    if (is_increasing == (extrema[-1]['type'] is MAXIMUM)
+            and is_increasing == (histograms[-1]['price'] > extrema[-1]['price'])
+            or divergences[-1] * divergences[-2] < 0):
+        return 'buy' if is_increasing else 'sell'
     return 'hold'
 
 def check_monotonicity(period):
@@ -59,7 +58,6 @@ def find_extrema(histograms, movement_period):
             movements.insert(0, movement)
             movement = []
         movement.insert(0, {
-            'macd': histograms[i]['macd'],
             'divergence': divergence,
             'price': histograms[i]['price']
         })
@@ -71,7 +69,6 @@ def find_extrema(histograms, movement_period):
         return {
             'type': extremum_type,
             'period': len(movement),
-            'macd': ext([m['macd'] for m in movement], extremum_type),
             'price': ext([m['price'] for m in movement], extremum_type),
         }
     def find_essential_extrema(all_extrema, movement_period):
@@ -87,7 +84,6 @@ def find_extrema(histograms, movement_period):
                 if extremum['type'] == all_extrema[i]['type']:
                     extremum = {
                         'type': extremum['type'],
-                        'macd': ext([extremum['macd'], all_extrema[i]['macd']], extremum['type']),
                         'price': ext([extremum['price'], all_extrema[i]['price']], extremum['type'])
                     }
                     continue
@@ -95,32 +91,11 @@ def find_extrema(histograms, movement_period):
                     essential_extrema.insert(0, extremum)
             extremum = {
                 'type': all_extrema[i]['type'],
-                'macd': all_extrema[i]['macd'],
                 'price': all_extrema[i]['price'],
             }
         essential_extrema.insert(0, extremum)
         return essential_extrema
     return find_essential_extrema([find_extremum(m) for m in movements], movement_period)
-
-def find_trend_strength_disparity(extrema):
-    """
-    Find trend strength disparity
-    """
-    def find_trend(first_extremum, second_extremum):
-        """
-        Find trend
-        """
-        return {
-            'value': UP if (
-                first_extremum['type'] is MINIMUM and second_extremum['type'] is MAXIMUM
-            ) else (DOWN if (
-                first_extremum['type'] is MAXIMUM and second_extremum['type'] is MINIMUM
-            ) else None),
-            'strength': float(abs(second_extremum['price'] - first_extremum['price']))
-        }
-    first_strength = find_trend(extrema[-3], extrema[-2])['strength']
-    second_trend = find_trend(extrema[-2], extrema[-1])
-    return (second_trend['strength'] / first_strength) ** (1 if second_trend['value'] is UP else -1)
 
 def ext(values, extremum_type):
     """
