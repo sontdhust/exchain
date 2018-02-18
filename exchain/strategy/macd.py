@@ -13,16 +13,17 @@ def analyse_macd(histograms, monotonic_period, movement_period):
     """
     macds = [h['macd'] for h in histograms]
     divergences = [h['macd'] - h['signal'] for h in histograms]
+    is_upside = divergences[-1] > 0
+    last_extremum = [e for e in find_extrema(histograms, movement_period) if (
+        e['type'] == (MINIMUM if is_upside else MAXIMUM)
+    )][-1]
+    if is_upside == (histograms[-1]['price'] < last_extremum['last_price']):
+        return 'sell' if is_upside else 'buy'
     monotonicity = check_monotonicity(divergences[-monotonic_period:])
-    extrema = find_extrema(histograms, movement_period)
-    if (monotonicity is None
-            or monotonicity != check_monotonicity(macds[-monotonic_period:])):
-        return 'hold'
-    is_increasing = monotonicity is INCREASING
-    if (is_increasing == (extrema[-1]['type'] is MAXIMUM)
-            and is_increasing == (histograms[-1]['price'] > extrema[-1]['price'])
-            or divergences[-1] * divergences[-2] < 0):
-        return 'buy' if is_increasing else 'sell'
+    if (monotonicity is not None
+            and monotonicity == check_monotonicity(macds[-monotonic_period:])
+            and (monotonicity is INCREASING) == is_upside):
+        return 'buy' if is_upside else 'sell'
     return 'hold'
 
 def check_monotonicity(period):
@@ -69,7 +70,7 @@ def find_extrema(histograms, movement_period):
         return {
             'type': extremum_type,
             'period': len(movement),
-            'price': ext([m['price'] for m in movement], extremum_type),
+            'last_price': movement[-1]['price'],
         }
     def find_essential_extrema(all_extrema, movement_period):
         """
@@ -82,23 +83,13 @@ def find_extrema(histograms, movement_period):
                 continue
             if len(extremum) != 0:
                 if extremum['type'] == all_extrema[i]['type']:
-                    extremum = {
-                        'type': extremum['type'],
-                        'price': ext([extremum['price'], all_extrema[i]['price']], extremum['type'])
-                    }
                     continue
                 else:
                     essential_extrema.insert(0, extremum)
             extremum = {
                 'type': all_extrema[i]['type'],
-                'price': all_extrema[i]['price'],
+                'last_price': all_extrema[i]['last_price'],
             }
         essential_extrema.insert(0, extremum)
         return essential_extrema
     return find_essential_extrema([find_extremum(m) for m in movements], movement_period)
-
-def ext(values, extremum_type):
-    """
-    Ext
-    """
-    return max(values) if extremum_type is MAXIMUM else min(values)
