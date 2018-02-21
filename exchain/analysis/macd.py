@@ -7,9 +7,9 @@ DECREASING = False
 MAXIMUM = True
 MINIMUM = False
 
-def analyse_macd(histograms, monotonic_period, movement_period):
+def analyze_macd(histograms, monotonic_period, movement_period):
     """
-    Analyse MACD
+    Analyze MACD
     """
     macds = [h['macd'] for h in histograms]
     divergences = [h['macd'] - h['signal'] for h in histograms]

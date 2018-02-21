@@ -15,7 +15,7 @@
             }
         }
     },
-    "strategy": {
+    "analysis": {
         "macd": {
             "period": 120,
             "monotonic_period": 1,
