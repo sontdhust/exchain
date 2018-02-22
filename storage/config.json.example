@@ -15,12 +15,11 @@
             }
         }
     },
-    "strategy": {
+    "analysis": {
         "macd": {
             "period": 120,
-            "difference_monotonic_period": 1,
-            "difference_period": 1,
-            "macd_dispersity": 1
+            "monotonic_period": 1,
+            "movement_period": 1
         }
     }
 }

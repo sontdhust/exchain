@@ -12,13 +12,13 @@ from storage import (
 )
 from api import fetch_prices
 from indicator import calculate_macd_histograms
-from strategy import analyse_macd
+from analysis import analyze_macd
 
 SCHEDULER = sched.scheduler(time.time, time.sleep)
 
 def main():
     """
-    Main function
+    Main
     """
     interval = read_config('api.data_fetcher.interval')
     connect_database(read_config('storage.database.mysql'))
@@ -40,11 +40,10 @@ def trade(interval):
         if len(prices) == 0:
             continue
         macd_histograms = calculate_macd_histograms(prices)
-        side = analyse_macd(
-            macd_histograms[-read_config('strategy.macd.period'):],
-            read_config('strategy.macd.difference_monotonic_period'),
-            read_config('strategy.macd.difference_period'),
-            read_config('strategy.macd.macd_dispersity')
+        side = analyze_macd(
+            macd_histograms[-read_config('analysis.macd.period'):],
+            read_config('analysis.macd.monotonic_period'),
+            read_config('analysis.macd.movement_period')
         )
         price = macd_histograms[-1]['price']
         amount = 0
