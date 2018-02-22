@@ -22,13 +22,13 @@ def main():
     """
     interval = read_config('api.data_fetcher.interval')
     connect_database(read_config('storage.database.mysql'))
-    SCHEDULER.enter(delay(interval), 1, trade, (interval,))
+    SCHEDULER.enter(delay(interval), 1, execute, (interval,))
     SCHEDULER.run()
     close_database()
 
-def trade(interval):
+def execute(interval):
     """
-    Trade
+    Execute
     """
     for ticker in select_tickers():
         prices = fetch_prices(
@@ -59,7 +59,7 @@ def trade(interval):
                 + str(amount) + '; '
                 + trade_type
             )
-    SCHEDULER.enter(delay(interval), 1, trade, (interval,))
+    SCHEDULER.enter(delay(interval), 1, execute, (interval,))
 
 def delay(interval):
     """
