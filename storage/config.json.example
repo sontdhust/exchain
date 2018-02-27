@@ -21,5 +21,10 @@
             "monotonic_period": 1,
             "movement_period": 1
         }
+    },
+    "strategy": {
+        "rule": {
+            "consensus_threshold": 1
+        }
     }
 }
