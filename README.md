@@ -13,14 +13,16 @@ exchain# dpkg-reconfigure tzdata
 ### 2. Configure
 ```
 exchain# cp ./storage/config.json.example ./storage/config.json
-exchain# cp ./storage/database.sql.example ./storage/database.sql
+exchain# cp ./storage/database-migration.sql.default ./storage/database-migration.sql
+exchain# cp ./storage/database-seeding.sql.example ./storage/database-seeding.sql
 exchain# vi ./storage/config.json
-exchain# vi ./storage/database.sql
+exchain# vi ./storage/database-seeding.sql
 ```
 
 ### 3. Import data
 ```
-exchain# mysql -uroot < ./storage/database.sql
+exchain# mysql -uroot < ./storage/database-migration.sql
+exchain# mysql -uroot < ./storage/database-seeding.sql
 ```
 
 ### 4. Run

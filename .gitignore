@@ -3,6 +3,7 @@
 
 # Project ignore files
 storage/*
+!storage/*.default
 !storage/*.example
 
 /tmp
