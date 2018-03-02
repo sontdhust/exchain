@@ -9,4 +9,3 @@ from storage.database import (
     select_assets,
     select_previous_trade, insert_trade
 )
-from storage.logger import write_log

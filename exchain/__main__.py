@@ -7,8 +7,7 @@ from storage import (
     connect_database, close_database,
     select_tickers, update_ticker,
     select_assets,
-    select_previous_trade, insert_trade,
-    write_log
+    select_previous_trade, insert_trade
 )
 from api import fetch_prices
 from indicator import calculate_macd_histograms
