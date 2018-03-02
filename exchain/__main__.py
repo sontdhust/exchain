@@ -2,8 +2,6 @@
 Exchain
 """
 
-import sched
-import time
 from storage import (
     read_config,
     connect_database, close_database,
@@ -15,21 +13,17 @@ from storage import (
 from api import fetch_prices
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import identify_side
-
-SCHEDULER = sched.scheduler(time.time, time.sleep)
+from strategy import run_schedule, identify_side
 
 def main():
     """
     Main
     """
-    interval = read_config('api.data_fetcher.interval')
     connect_database(read_config('storage.database.mysql'))
-    SCHEDULER.enter(delay(interval), 1, execute, (interval,))
-    SCHEDULER.run()
+    run_schedule(read_config('strategy.scheduler.interval'), execute)
     close_database()
 
-def execute(interval):
+def execute():
     """
     Execute
     """
@@ -38,7 +32,7 @@ def execute(interval):
         prices = fetch_prices(
             ticker['exchange'],
             ticker['pair'],
-            interval,
+            read_config('api.data_fetcher.interval'),
             read_config('api.data_fetcher.period')
         )
         if len(prices) == 0:
@@ -59,21 +53,6 @@ def execute(interval):
         previous_trade = select_previous_trade(asset['id'])
         if side != 'hold' and (previous_trade is None or previous_trade['side'] != side):
             insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
-            write_log(
-                asset['exchange'] + '_' + asset['pair'],
-                time.strftime('%d %H:%M:%S', time.localtime(prices[-1]['time'])) + '; '
-                + side + '; '
-                + str(asset['price']) + '; '
-                + str(asset['amount']) + '; '
-                + trade_type
-            )
-    SCHEDULER.enter(delay(interval), 1, execute, (interval,))
-
-def delay(interval):
-    """
-    Delay
-    """
-    return interval - int(time.time()) % interval
 
 if __name__ == "__main__":
     main()
