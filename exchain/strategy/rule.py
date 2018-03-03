@@ -16,3 +16,15 @@ def identify_side(sides, consensus_threshold):
         return most_common[0][0]
     else:
         return None
+
+def check_reversal(previous_trade, side):
+    """
+    Check reversal
+    """
+    if side == 'hold':
+        return False
+    if previous_trade is None:
+        return True
+    previous_position = previous_trade['side'].split('-')[0]
+    position = side.split('-')[0]
+    return previous_position != position

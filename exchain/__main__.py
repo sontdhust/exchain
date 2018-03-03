@@ -12,7 +12,7 @@ from storage import (
 from api import fetch_prices
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import run_schedule, identify_side
+from strategy import run_schedule, identify_side, check_reversal
 
 def main():
     """
@@ -48,10 +48,11 @@ def execute():
     if side is None:
         return
     trade_type = 'market'
-    for asset in select_assets():
-        previous_trade = select_previous_trade(asset['id'])
-        if side != 'hold' and (previous_trade is None or previous_trade['side'] != side):
-            insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
+    reversed_assets = [a for a in select_assets() if check_reversal(
+        select_previous_trade(a['id']), side
+    )]
+    for asset in reversed_assets:
+        insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
 
 if __name__ == "__main__":
     main()
