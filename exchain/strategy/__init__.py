@@ -2,4 +2,5 @@
 Strategy
 """
 
-from strategy.rule import identify_side
+from strategy.scheduler import run_schedule
+from strategy.rule import identify_side, check_reversal

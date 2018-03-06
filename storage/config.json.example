@@ -23,6 +23,9 @@
         }
     },
     "strategy": {
+        "scheduler": {
+            "interval": 60
+        },
         "rule": {
             "consensus_threshold": 1
         }

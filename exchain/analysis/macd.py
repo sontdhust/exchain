@@ -11,19 +11,21 @@ def analyze_macd(histograms, monotonic_period, movement_period):
     """
     Analyze MACD
     """
-    macds = [h['macd'] for h in histograms]
     divergences = [h['macd'] - h['signal'] for h in histograms]
     is_upside = divergences[-1] > 0
     last_extremum = [e for e in find_extrema(histograms, movement_period) if (
         e['type'] == (MINIMUM if is_upside else MAXIMUM)
     )][-1]
     if is_upside == (histograms[-1]['price'] < last_extremum['last_price']):
-        return 'sell' if is_upside else 'buy'
+        return ('sell' if is_upside else 'buy') + '-close'
     monotonicity = check_monotonicity(divergences[-monotonic_period:])
+    macds = [h['macd'] for h in histograms]
+    signals = [h['signal'] for h in histograms]
     if (monotonicity is not None
             and monotonicity == check_monotonicity(macds[-monotonic_period:])
+            and monotonicity == check_monotonicity(signals[-monotonic_period:])
             and (monotonicity is INCREASING) == is_upside):
-        return 'buy' if is_upside else 'sell'
+        return ('buy' if is_upside else 'sell') + '-open'
     return 'hold'
 
 def check_monotonicity(period):
