@@ -9,7 +9,7 @@ from storage import (
     select_assets,
     select_previous_trade, insert_trade
 )
-from api import fetch_prices
+from api import fetch_prices, notify_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
 from strategy import run_schedule, identify_side, check_reversal
@@ -51,8 +51,15 @@ def execute():
     reversed_assets = [a for a in select_assets() if check_reversal(
         select_previous_trade(a['id']), side
     )]
-    for asset in reversed_assets:
-        insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
+    grouped_assets = [(u, [{key: a[key] for key in [
+        'id', 'exchange', 'pair', 'price', 'amount'
+    ]} for a in reversed_assets if a['slack_webhook_url'] == u]) for u in set(
+        [a['slack_webhook_url'] for a in reversed_assets]
+    )]
+    for assets in grouped_assets:
+        for asset in assets[1]:
+            insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
+        notify_trade(assets, side)
 
 if __name__ == "__main__":
     main()
