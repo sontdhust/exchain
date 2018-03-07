@@ -10,10 +10,7 @@ def fetch_prices(exchange, pair, interval, period):
     """
     Fetch prices
     """
-    try:
-        candles = fetch_candles(exchange, pair, [interval], period)
-    except:
-        return []
+    candles = fetch_candles(exchange, pair, [interval], period)
     return [{'time': c[0], 'value': c[4]} for c in candles[str(interval)]]
 
 def fetch_candles(exchange, pair, intervals, period):
