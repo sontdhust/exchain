@@ -12,20 +12,13 @@ from storage import (
 from api import fetch_prices, notify_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import run_schedule, identify_side, check_reversal
+from strategy import identify_side, check_reversal
 
 def main():
     """
     Main
     """
     connect_database(read_config('storage.database.mysql'))
-    run_schedule(read_config('strategy.scheduler.interval'), execute)
-    close_database()
-
-def execute():
-    """
-    Execute
-    """
     sides = []
     for ticker in select_tickers():
         prices = fetch_prices(
@@ -60,6 +53,7 @@ def execute():
         for asset in assets[1]:
             insert_trade(asset['id'], side, asset['price'], asset['amount'], trade_type)
         notify_trade(assets, side)
+    close_database()
 
 if __name__ == "__main__":
     main()
