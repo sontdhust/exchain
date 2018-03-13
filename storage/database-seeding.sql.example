@@ -6,10 +6,14 @@ USE `exchain`;
 
 INSERT INTO `users` (`name`) VALUES ('');
 
-INSERT INTO `tickers` (`exchange`, `pair`) VALUES
-    ('bitflyer', 'btcfxjpy'),
-    ('bitfinex', 'btcusd'),
-    ('bitfinex', 'ethusd'),
-    ('bitfinex', 'xrpusd'),
-    ('bitfinex', 'bchusd'),
-    ('bitfinex', 'ltcusd');
+INSERT INTO `tickers` (`exchange`, `pair`, `priority`) VALUES
+    ('bitfinex', 'btcusd', 1),
+    ('bitfinex', 'ethusd', 1),
+    ('bitfinex', 'xrpusd', 1),
+    ('bitfinex', 'bchusd', 1),
+    ('bitfinex', 'ltcusd', 1),
+    ('bitfinex', 'neousd', 1),
+    ('bitfinex', 'eosusd', 1),
+    ('bitfinex', 'xmrusd', 1),
+    ('bitfinex', 'dashusd', 1),
+    ('bitfinex', 'iotusd', 1);

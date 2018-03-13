@@ -26,11 +26,17 @@ def select_tickers():
     Select tickers
     """
     query = (
-        'SELECT id, exchange, pair '
-        'FROM tickers'
+        'SELECT id, exchange, pair, priority '
+        'FROM tickers '
+        'ORDER BY id'
     )
     DATABASE['cursor'].execute(query)
-    result = [{'id': r[0], 'exchange': r[1], 'pair': r[2]} for r in DATABASE['cursor'].fetchall()]
+    result = [{
+        'id': r[0],
+        'exchange': r[1],
+        'pair': r[2],
+        'priority': r[3]
+    } for r in DATABASE['cursor'].fetchall()]
     return result
 
 def update_ticker(ticker_id, side, price):
@@ -59,7 +65,8 @@ def select_assets():
         'FROM assets '
         'JOIN users ON assets.user_id = users.id '
         'JOIN tickers ON assets.ticker_id = tickers.id '
-        'WHERE priority > 0'
+        'WHERE assets.priority > 0 '
+        'ORDER BY assets.id'
     )
     DATABASE['cursor'].execute(query)
     result = [{

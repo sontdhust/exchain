@@ -36,7 +36,8 @@ def main():
             read_config('analysis.macd.movement_period')
         )
         update_ticker(ticker['id'], ticker_side, prices[-1]['value'])
-        sides.append(ticker_side)
+        if ticker['priority'] > 0:
+            sides.append(ticker_side)
     side = identify_side(sides, read_config('strategy.rule.consensus_threshold'))
     if side is None:
         return
