@@ -28,3 +28,13 @@ def check_reversal(previous_trade, side):
     previous_position = previous_trade['side'].split('-')[0]
     position = side.split('-')[0]
     return previous_position != position
+
+def investigate_side(side):
+    """
+    Investigate side
+    """
+    is_open_side = side.split('-')[1] == 'open'
+    if is_open_side:
+        return ('previous_pivot', 'limit')
+    else:
+        return ('last_price', 'market')

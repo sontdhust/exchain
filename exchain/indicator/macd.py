@@ -38,5 +38,5 @@ def calculate_sma(prices, start, end):
     """
     sma = 0
     for i in range(start, end + 1):
-        sma += float(prices[i]['value'])
+        sma += prices[i]['value']
     return sma
