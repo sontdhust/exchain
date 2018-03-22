@@ -13,17 +13,19 @@ def analyze_macd(histograms, monotonic_period, movement_period):
     """
     divergences = [h['macd'] - h['signal'] for h in histograms]
     is_upside = divergences[-1] > 0
-    last_extremum = [e for e in find_extrema(histograms, movement_period) if (
+    levels = [e for e in find_levels(histograms, movement_period) if (
         e['type'] == (MINIMUM if is_upside else MAXIMUM)
-    )][-1]
-    if is_upside == (histograms[-1]['price'] < last_extremum['last_price']):
+    )]
+    if len(levels) > 0 and is_upside == (histograms[-1]['price'] < levels[-1]['last_price']):
         return ('sell' if is_upside else 'buy') + '-close'
     monotonicity = check_monotonicity(divergences[-monotonic_period:])
     macds = [h['macd'] for h in histograms]
     signals = [h['signal'] for h in histograms]
+    prices = [h['price'] for h in histograms]
     if (monotonicity is not None
             and monotonicity == check_monotonicity(macds[-monotonic_period:])
             and monotonicity == check_monotonicity(signals[-monotonic_period:])
+            and monotonicity == check_monotonicity(prices[-monotonic_period:])
             and (monotonicity is INCREASING) == is_upside):
         return ('buy' if is_upside else 'sell') + '-open'
     return 'hold'
@@ -49,9 +51,9 @@ def check_monotonicity(period):
             return None
     return monotonicity
 
-def find_extrema(histograms, movement_period):
+def find_levels(histograms, movement_period):
     """
-    Find extrema
+    Find levels
     """
     movements = []
     movement = []
@@ -64,34 +66,34 @@ def find_extrema(histograms, movement_period):
             'divergence': divergence,
             'price': histograms[i]['price']
         })
-    def find_extremum(movement):
+    def find_level(movement):
         """
-        Find extremum
+        Find level
         """
-        extremum_type = MAXIMUM if movement[-1]['divergence'] > 0 else MINIMUM
+        level_type = MAXIMUM if movement[-1]['divergence'] > 0 else MINIMUM
         return {
-            'type': extremum_type,
+            'type': level_type,
             'period': len(movement),
             'last_price': movement[-1]['price'],
         }
-    def find_essential_extrema(all_extrema, movement_period):
+    def find_essential_levels(all_levels, movement_period):
         """
-        Find essential extrema
+        Find essential levels
         """
-        essential_extrema = []
-        extremum = {}
-        for i in range(len(all_extrema) - 1, -1, -1):
-            if all_extrema[i]['period'] < movement_period:
+        essential_levels = []
+        level = {}
+        for i in range(len(all_levels) - 1, -1, -1):
+            if all_levels[i]['period'] < movement_period:
                 continue
-            if len(extremum) != 0:
-                if extremum['type'] == all_extrema[i]['type']:
+            if len(level) != 0:
+                if level['type'] == all_levels[i]['type']:
                     continue
                 else:
-                    essential_extrema.insert(0, extremum)
-            extremum = {
-                'type': all_extrema[i]['type'],
-                'last_price': all_extrema[i]['last_price'],
+                    essential_levels.insert(0, level)
+            level = {
+                'type': all_levels[i]['type'],
+                'last_price': all_levels[i]['last_price'],
             }
-        essential_extrema.insert(0, extremum)
-        return essential_extrema
-    return find_essential_extrema([find_extremum(m) for m in movements], movement_period)
+        essential_levels.insert(0, level)
+        return essential_levels
+    return find_essential_levels([find_level(m) for m in movements], movement_period)

@@ -3,16 +3,20 @@ Notification
 """
 
 import json
+import math
+import decimal
 import requests
 
-def notify_trade(assets, side):
+def notify_trades(url, trades, side):
     """
-    Notify trade
+    Notify trades
     """
     text = '\n'.join([(
-        '*' + a['pair'].upper() + '* (_' + a['exchange'].title() + '_): ' + str(a['price']) + '.'
-    ) for a in assets[1]])
-    send_slack_message(assets[0], '', [{
+        '*' + t['pair'].upper()
+        + '* (_' + t['exchange'].title() + '_): '
+        + format_price(t['price']) + '.'
+    ) for t in trades])
+    send_slack_message(url, '', [{
         'fallback': side.title() + '.',
         'text': text,
         'color': 'warning' if 'close' in side else ('good' if 'buy' in side else 'danger'),
@@ -32,3 +36,14 @@ def send_slack_message(webhook_url, text, attachments):
     }), {
         'Content-Type': 'application/json'
     })
+
+def format_price(price, max_fractional=5):
+    """
+    Format price
+    """
+    integer = 1
+    if price != 0:
+        logarithm = math.log10(price)
+        integer = int(logarithm) + (1 if logarithm > 0 else 0)
+    fractional = max_fractional - integer if integer < max_fractional else 0
+    return str(decimal.Decimal(('{:.' + str(fractional) + 'f}').format(price)).normalize())
