@@ -39,19 +39,20 @@ def select_tickers():
     } for r in DATABASE['cursor'].fetchall()]
     return result
 
-def update_ticker(ticker_id, side, price):
+def update_ticker(ticker_id, side, price, chart):
     """
     Update ticker
     """
     query = (
         'UPDATE tickers '
-        'SET side = %(side)s, price = %(price)s, updated_at = %(updated_at)s '
+        'SET side = %(side)s, price = %(price)s, chart = %(chart)s, updated_at = %(updated_at)s '
         'WHERE id = %(id)s'
     )
     DATABASE['cursor'].execute(query, {
         'id': ticker_id,
         'side': side,
         'price': price,
+        'chart': chart,
         'updated_at': get_current_datetime()
     })
     DATABASE['connector'].commit()
