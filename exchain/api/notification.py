@@ -19,7 +19,7 @@ def notify_trades(url, trades, side):
     send_slack_message(url, '', [{
         'fallback': side.title() + '.',
         'text': text,
-        'color': 'warning' if 'close' in side else ('good' if 'buy' in side else 'danger'),
+        'color': 'good' if 'buy' in side else 'danger',
         'mrkdwn_in': ['text']
     }])
 

@@ -13,14 +13,14 @@ def calculate_macd_histograms(prices):
     fast_multiplier = 2.0 / (FAST_PERIOD + 1)
     slow_multiplier = 2.0 / (SLOW_PERIOD + 1)
     signal_multiplier = 2.0 / (SIGNAL_PERIOD + 1)
-    fast = calculate_sma(prices, FAST_PERIOD - 1, SLOW_PERIOD - 1)
-    slow = calculate_sma(prices, 0, SLOW_PERIOD - 1)
+    fast = calculate_sma(prices, 'close', FAST_PERIOD - 1, SLOW_PERIOD - 1)
+    slow = calculate_sma(prices, 'close', 0, SLOW_PERIOD - 1)
     macds = []
     for price in prices[SLOW_PERIOD:]:
-        fast += (price['value'] - fast) * fast_multiplier
-        slow += (price['value'] - slow) * slow_multiplier
-        macds.append({'time': price['time'], 'value': fast - slow, 'price': price['value']})
-    signal = calculate_sma(macds, 0, SIGNAL_PERIOD - 1)
+        fast += (price['close'] - fast) * fast_multiplier
+        slow += (price['close'] - slow) * slow_multiplier
+        macds.append({'time': price['time'], 'value': fast - slow, 'price': price['close']})
+    signal = calculate_sma(macds, 'value', 0, SIGNAL_PERIOD - 1)
     macd_histograms = []
     for macd in macds[SIGNAL_PERIOD:]:
         signal += (macd['value'] - signal) * signal_multiplier
@@ -32,11 +32,11 @@ def calculate_macd_histograms(prices):
         })
     return macd_histograms
 
-def calculate_sma(prices, start, end):
+def calculate_sma(period, key, start, end):
     """
     Calculate SMA
     """
     sma = 0
     for i in range(start, end + 1):
-        sma += prices[i]['value']
+        sma += period[i][key]
     return sma

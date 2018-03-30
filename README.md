@@ -25,7 +25,7 @@ exchain# vi /etc/mysql/mariadb.conf.d/50-server.cnf
 > #bind-address = 127.0.0.1
 
 ```
-exchain# service mysql restart
+exchain# service mysql restart --server-id=1 --log-bin --binlog-format=row --binlog-do-db=exchain
 exchain# dpkg-reconfigure tzdata
 exchain# pip install mysql-connector==2.1.6 requests
 ```
