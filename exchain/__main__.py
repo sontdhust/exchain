@@ -22,7 +22,6 @@ def main():
     connect_database(read_config('storage.database.mysql'))
     sides = []
     points = {}
-    period = read_config('analysis.macd.period')
     for ticker in select_tickers():
         prices, previous_pivot = fetch_points(
             ticker['exchange'],
@@ -32,9 +31,8 @@ def main():
         )
         if len(prices) == 0:
             continue
-        macd_histograms = calculate_macd_histograms(prices)[-period:]
         ticker_side = analyze_macd(
-            macd_histograms,
+            calculate_macd_histograms(prices)[-read_config('analysis.macd.period'):],
             read_config('analysis.macd.monotonic_period'),
             read_config('analysis.macd.movement_period')
         )
@@ -55,32 +53,19 @@ def main():
     if side is None or side == 'hold':
         return
     side_type = investigate_side(side)
-    for assets in group_assets(select_assets(), side):
-        trades = []
-        for asset in assets[1]:
-            price = points[asset['ticker_id']][side_type[0]]
-            insert_trade(asset['id'], side, price, asset['amount'], side_type[1])
-            trades.append({
-                'exchange': asset['exchange'],
-                'pair': asset['pair'],
-                'price': price
-            })
-        notify_trades(assets[0], trades, side)
+    assets = [a for a in select_assets() if check_reversal(select_previous_trade(a['id']), side)]
+    trades = []
+    for asset in assets:
+        price = points[asset['ticker_id']][side_type[0]]
+        insert_trade(asset['id'], side, price, asset['amount'], side_type[1])
+        trades.append({
+            'api': asset['api'],
+            'exchange': asset['exchange'],
+            'pair': asset['pair'],
+            'price': price
+        })
+    notify_trades(trades, side)
     close_database()
-
-def group_assets(assets, side):
-    """
-    Group assets
-    """
-    reversed_assets = [a for a in assets if check_reversal(
-        select_previous_trade(a['id']), side
-    )]
-    grouped_assets = [(u, [{key: a[key] for key in [
-        'id', 'ticker_id', 'exchange', 'pair', 'amount'
-    ]} for a in reversed_assets if a['api']['slack_webhook_url'] == u]) for u in set(
-        [a['api']['slack_webhook_url'] for a in reversed_assets]
-    )]
-    return grouped_assets
 
 if __name__ == "__main__":
     main()
