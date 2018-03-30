@@ -3,6 +3,7 @@ Database
 """
 
 import datetime
+import json
 import mysql.connector
 
 DATABASE = {'connector': None, 'cursor': None}
@@ -62,7 +63,7 @@ def select_assets():
     Select assets
     """
     query = (
-        'SELECT assets.id, tickers.id, slack_webhook_url, exchange, pair, amount '
+        'SELECT assets.id, tickers.id, api, exchange, pair, amount '
         'FROM assets '
         'JOIN users ON assets.user_id = users.id '
         'JOIN tickers ON assets.ticker_id = tickers.id '
@@ -70,10 +71,20 @@ def select_assets():
         'ORDER BY assets.id'
     )
     DATABASE['cursor'].execute(query)
+    def load_api(text):
+        """
+        Load api
+        """
+        default_api = {
+            'slack_webhook_url': ''
+        }
+        api = json.loads(text) if text is not None else {}
+        api.update({k: v for k, v in default_api.iteritems() if k not in api})
+        return api
     result = [{
         'id': r[0],
         'ticker_id': r[1],
-        'slack_webhook_url': r[2],
+        'api': load_api(r[2]),
         'exchange': r[3],
         'pair': r[4],
         'amount': r[5]

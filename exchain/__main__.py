@@ -77,8 +77,8 @@ def group_assets(assets, side):
     )]
     grouped_assets = [(u, [{key: a[key] for key in [
         'id', 'ticker_id', 'exchange', 'pair', 'amount'
-    ]} for a in reversed_assets if a['slack_webhook_url'] == u]) for u in set(
-        [a['slack_webhook_url'] for a in reversed_assets]
+    ]} for a in reversed_assets if a['api']['slack_webhook_url'] == u]) for u in set(
+        [a['api']['slack_webhook_url'] for a in reversed_assets]
     )]
     return grouped_assets
 
