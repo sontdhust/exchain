@@ -13,7 +13,7 @@ from storage import (
 from api import fetch_points, notify_trades
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import identify_side, check_reversal, investigate_side
+from strategy import identify_overall_side, check_reversal, investigate_side
 
 def main():
     """
@@ -22,7 +22,6 @@ def main():
     connect_database(read_config('storage.database.mysql'))
     sides = []
     points = {}
-    period = read_config('analysis.macd.period')
     for ticker in select_tickers():
         prices, previous_pivot = fetch_points(
             ticker['exchange'],
@@ -32,13 +31,12 @@ def main():
         )
         if len(prices) == 0:
             continue
-        macd_histograms = calculate_macd_histograms(prices)[-period:]
-        ticker_side = analyze_macd(
-            macd_histograms,
+        side = analyze_macd(
+            calculate_macd_histograms(prices)[-read_config('analysis.macd.period'):],
             read_config('analysis.macd.monotonic_period'),
             read_config('analysis.macd.movement_period')
         )
-        update_ticker(ticker['id'], ticker_side, prices[-1]['close'], json.dumps([(
+        update_ticker(ticker['id'], side, prices[-1]['close'], json.dumps([(
             p['time'],
             p['open'],
             p['high'],
@@ -46,41 +44,30 @@ def main():
             p['close']
         ) for p in prices]))
         if ticker['priority'] > 0:
-            sides.append(ticker_side)
+            sides.append(side)
         points[ticker['id']] = {
             'last_price': prices[-1]['close'],
             'previous_pivot': previous_pivot
         }
-    side = identify_side(sides, read_config('strategy.rule.consensus_threshold'))
-    if side is None or side == 'hold':
+    overall_side = identify_overall_side(sides, read_config('strategy.rule.consensus_threshold'))
+    if overall_side is None or overall_side == 'hold':
         return
-    side_type = investigate_side(side)
-    for assets in group_assets(select_assets(), side):
-        trades = []
-        for asset in assets[1]:
-            price = points[asset['ticker_id']][side_type[0]]
-            insert_trade(asset['id'], side, price, asset['amount'], side_type[1])
-            trades.append({
-                'exchange': asset['exchange'],
-                'pair': asset['pair'],
-                'price': price
-            })
-        notify_trades(assets[0], trades, side)
+    overall_side_type = investigate_side(overall_side)
+    assets = [a for a in select_assets() if check_reversal(
+        select_previous_trade(a['id']), overall_side
+    )]
+    trades = []
+    for asset in assets:
+        price = points[asset['ticker_id']][overall_side_type[0]]
+        insert_trade(asset['id'], overall_side, price, asset['amount'], overall_side_type[1])
+        trades.append({
+            'api': asset['api'],
+            'exchange': asset['exchange'],
+            'pair': asset['pair'],
+            'price': price
+        })
+    notify_trades(trades, overall_side)
     close_database()
-
-def group_assets(assets, side):
-    """
-    Group assets
-    """
-    reversed_assets = [a for a in assets if check_reversal(
-        select_previous_trade(a['id']), side
-    )]
-    grouped_assets = [(u, [{key: a[key] for key in [
-        'id', 'ticker_id', 'exchange', 'pair', 'amount'
-    ]} for a in reversed_assets if a['api']['slack_webhook_url'] == u]) for u in set(
-        [a['api']['slack_webhook_url'] for a in reversed_assets]
-    )]
-    return grouped_assets
 
 if __name__ == "__main__":
     main()

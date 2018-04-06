@@ -4,9 +4,9 @@ Rule
 
 from collections import Counter
 
-def identify_side(sides, consensus_threshold):
+def identify_overall_side(sides, consensus_threshold):
     """
-    Identify side
+    Identify overall side
     """
     most_common = Counter(sides).most_common(2)
     if (len(most_common) == 1
