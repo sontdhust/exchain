@@ -52,4 +52,6 @@ def format_price(price, max_fractional=5):
         logarithm = math.log10(price)
         integer = int(logarithm) + (1 if logarithm > 0 else 0)
     fractional = max_fractional - integer if integer < max_fractional else 0
-    return str(decimal.Decimal(('{:.' + str(fractional) + 'f}').format(price)).normalize())
+    normalized = decimal.Decimal(('{:.' + str(fractional) + 'f}').format(price)).normalize()
+    exponent = normalized.as_tuple()[2]
+    return str(normalized if exponent <= 0 else normalized.quantize(1))

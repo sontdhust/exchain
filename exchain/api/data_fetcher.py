@@ -32,5 +32,6 @@ def fetch_candles(exchange, pair, intervals, period):
         + exchange + '/'
         + pair + '/ohlc'
         + '?periods=' + ','.join([str(i) for i in intervals])
+        + '&before=' + str(now)
         + '&after=' + str(now - period * max(intervals))
     ).read())['result']
