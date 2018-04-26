@@ -2,7 +2,6 @@
 Exchain
 """
 
-import json
 from storage import (
     read_config,
     connect_database, close_database,
@@ -36,13 +35,7 @@ def main():
             read_config('analysis.macd.monotonic_period'),
             read_config('analysis.macd.movement_period')
         )
-        update_ticker(ticker['id'], side, prices[-1]['close'], json.dumps([(
-            p['time'],
-            p['open'],
-            p['high'],
-            p['low'],
-            p['close']
-        ) for p in prices]))
+        update_ticker(ticker['id'], side, prices[-1]['close'])
         if ticker['priority'] > 0:
             sides.append(side)
         points[ticker['id']] = {
