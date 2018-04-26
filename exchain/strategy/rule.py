@@ -33,8 +33,5 @@ def investigate_side(side):
     """
     Investigate side
     """
-    is_open_side = side.split('-')[1] == 'open'
-    if is_open_side:
-        return ('previous_pivot', 'limit')
-    else:
-        return ('last_price', 'market')
+    is_open_side = 'open' in side
+    return ('last_price', 'market' if is_open_side else 'market')
