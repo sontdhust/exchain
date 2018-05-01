@@ -13,7 +13,12 @@ def identify_overall_side(sides, consensus_threshold):
             or len(most_common) > 1
             and most_common[0][1] > most_common[1][1]
             and most_common[0][1] >= int(len(sides) * consensus_threshold)):
-        return most_common[0][0]
+        overall_side = most_common[0][0]
+        return overall_side if (
+            overall_side == 'hold'
+            or 'buy' in overall_side and len([s for s in sides if 'sell' in s]) == 0
+            or 'sell' in overall_side and len([s for s in sides if 'buy' in s]) == 0
+        ) else None
     else:
         return None
 
@@ -33,8 +38,5 @@ def investigate_side(side):
     """
     Investigate side
     """
-    is_open_side = side.split('-')[1] == 'open'
-    if is_open_side:
-        return ('previous_pivot', 'limit')
-    else:
-        return ('last_price', 'market')
+    is_open_side = 'open' in side
+    return ('last_price', 'market' if is_open_side else 'market')

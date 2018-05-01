@@ -6,21 +6,13 @@ import urllib2
 import time
 import json
 
-def fetch_points(exchange, pair, interval, period):
+def fetch_prices(exchange, pair, interval, period):
     """
-    Fetch points
+    Fetch prices
     """
     candles = fetch_candles(exchange, pair, [interval], period)[str(interval)]
-    prices = [{
-        'time': c[0],
-        'open': float(c[1]),
-        'high': float(c[2]),
-        'low': float(c[3]),
-        'close': float(c[4])
-    } for c in candles]
-    previous_candle = candles[-2]
-    previous_pivot = (previous_candle[2] + previous_candle[3] + previous_candle[4]) / 3.0
-    return (prices, previous_pivot)
+    prices = [{'time': c[0], 'close': float(c[4])} for c in candles]
+    return prices
 
 def fetch_candles(exchange, pair, intervals, period):
     """
@@ -32,6 +24,5 @@ def fetch_candles(exchange, pair, intervals, period):
         + exchange + '/'
         + pair + '/ohlc'
         + '?periods=' + ','.join([str(i) for i in intervals])
-        + '&before=' + str(now)
         + '&after=' + str(now - period * max(intervals))
     ).read())['result']

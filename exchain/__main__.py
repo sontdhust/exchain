@@ -2,7 +2,6 @@
 Exchain
 """
 
-import json
 from storage import (
     read_config,
     connect_database, close_database,
@@ -10,7 +9,7 @@ from storage import (
     select_assets,
     select_previous_trade, insert_trade
 )
-from api import fetch_points, notify_trades
+from api import fetch_prices, notify_trades
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
 from strategy import identify_overall_side, check_reversal, investigate_side
@@ -23,7 +22,7 @@ def main():
     sides = []
     points = {}
     for ticker in select_tickers():
-        prices, previous_pivot = fetch_points(
+        prices = fetch_prices(
             ticker['exchange'],
             ticker['pair'],
             read_config('api.data_fetcher.interval'),
@@ -36,18 +35,11 @@ def main():
             read_config('analysis.macd.monotonic_period'),
             read_config('analysis.macd.movement_period')
         )
-        update_ticker(ticker['id'], side, prices[-1]['close'], json.dumps([(
-            p['time'],
-            p['open'],
-            p['high'],
-            p['low'],
-            p['close']
-        ) for p in prices]))
+        update_ticker(ticker['id'], side, prices[-1]['close'])
         if ticker['priority'] > 0:
             sides.append(side)
         points[ticker['id']] = {
-            'last_price': prices[-1]['close'],
-            'previous_pivot': previous_pivot
+            'last_price': prices[-1]['close']
         }
     overall_side = identify_overall_side(sides, read_config('strategy.rule.consensus_threshold'))
     if overall_side is None or overall_side == 'hold':
