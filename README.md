@@ -3,7 +3,7 @@ Automated cryptocurrencies trading tool
 
 - Parameters:
   - **path**: */home/dare/Workspace*
-  - **interval**: *5*
+  - **interval**: *1*
 
 ### 0. Preparation
 <pre>
