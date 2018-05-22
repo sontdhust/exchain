@@ -62,7 +62,7 @@ def select_assets():
     Select assets
     """
     query = (
-        'SELECT assets.id, tickers.id, api, exchange, pair, amount '
+        'SELECT assets.id, tickers.id, api, exchange, symbol, amount '
         'FROM assets '
         'JOIN users ON assets.user_id = users.id '
         'JOIN tickers ON assets.ticker_id = tickers.id '
@@ -75,7 +75,9 @@ def select_assets():
         Load api
         """
         default_api = {
-            'slack_webhook_url': ''
+            'slack_webhook_url': '',
+            'bitflyer_api_key': '',
+            'bitflyer_api_secret': ''
         }
         api = json.loads(text) if text is not None else {}
         api.update({k: v for k, v in default_api.iteritems() if k not in api})
@@ -85,7 +87,7 @@ def select_assets():
         'ticker_id': r[1],
         'api': load_api(r[2]),
         'exchange': r[3],
-        'pair': r[4],
+        'symbol': r[4],
         'amount': r[5]
     } for r in DATABASE['cursor'].fetchall()]
     return result

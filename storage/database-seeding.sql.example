@@ -8,14 +8,10 @@ USE `exchain`;
 
 INSERT INTO `users` (`name`) VALUES ('');
 
-INSERT INTO `tickers` (`exchange`, `pair`, `priority`) VALUES
-    ('bitfinex', 'btcusd', 1),
-    ('bitfinex', 'ethusd', 1),
-    ('bitfinex', 'xrpusd', 1),
-    ('bitfinex', 'bchusd', 1),
-    ('bitfinex', 'ltcusd', 1),
-    ('bitfinex', 'neousd', 1),
-    ('bitfinex', 'eosusd', 1),
-    ('bitfinex', 'xmrusd', 1),
-    ('bitfinex', 'dashusd', 1),
-    ('bitfinex', 'iotusd', 1);
+INSERT INTO `tickers` (`exchange`, `pair`, `symbol`, `priority`) VALUES
+    ('bitfinex', 'btcusd', 'BTCUSD', 1),
+    ('bitfinex', 'ethusd', 'ETHUSD', 1),
+    ('bitfinex', 'xrpusd', 'XRPUSD', 1),
+    ('bitfinex', 'bchusd', 'BCHUSD', 1),
+    ('bitfinex', 'eosusd', 'EOSUSD', 1),
+    ('bitfinex', 'ltcusd', 'LTCUSD', 1);
