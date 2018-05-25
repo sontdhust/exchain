@@ -9,7 +9,7 @@ from storage import (
     select_assets,
     select_previous_trade, insert_trade
 )
-from api import fetch_prices, notify_trades, bitflyer_get_positions, bitflyer_send_child_order
+from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
 from strategy import identify_overall_side, check_reversal, investigate_side
@@ -59,7 +59,7 @@ def main():
                     'price': price,
                     'amount': asset['amount']
                 })
-    execute_trade(trades, overall_side.split('-')[0], overall_side_type[1])
+    execute_trade(trades, overall_side, overall_side_type[1])
     close_database()
 
 def execute_trade(trades, overall_side, overall_type):
@@ -69,16 +69,10 @@ def execute_trade(trades, overall_side, overall_type):
     notify_trades(trades, overall_side)
     for trade in trades:
         if trade['exchange'] == 'bitflyer':
-            api = {
+            bitflyer_trade({
                 'key': trade['api']['bitflyer_api_key'],
                 'secret': trade['api']['bitflyer_api_secret']
-            }
-            symbol = trade['symbol']
-            positions = bitflyer_get_positions(api, symbol)
-            amount = sum([
-                p['size'] for p in positions if p['side'] != overall_side.upper()
-            ]) + trade['amount']
-            bitflyer_send_child_order(api, symbol, overall_type, overall_side.upper(), amount)
+            }, trade['symbol'], overall_type, overall_side, trade['amount'])
 
 if __name__ == "__main__":
     main()

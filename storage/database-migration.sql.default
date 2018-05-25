@@ -51,7 +51,7 @@ CREATE TABLE `trades` (
     `side` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Ticker side',
     `price` double(15, 5) NOT NULL COMMENT 'Ticker price',
     `amount` double(15, 5) NOT NULL COMMENT 'Asset amount',
-    `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Either `MARKET`, `LIMIT`, `STOP`...',
+    `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Either `market`, `limit`, `stop`...',
     `created_at` timestamp NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `trades_asset_id_foreign` (`asset_id`),

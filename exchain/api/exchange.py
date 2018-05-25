@@ -9,11 +9,23 @@ import hmac
 import hashlib
 import requests
 
+def bitflyer_trade(api, symbol, overall_type, overall_side, amount):
+    """
+    Bitflyer trade
+    """
+    order_type = overall_type.upper()
+    side = overall_side.split('-')[0].upper()
+    positions = bitflyer_get_positions(api, symbol)
+    size = sum([
+        p['size'] for p in positions if p['side'] != side
+    ]) + amount
+    bitflyer_send_child_order(api, symbol, order_type, side, size)
+
 def bitflyer_get_positions(api, product_code):
     """
     Bitflyer get positions
     """
-    return bitflyer_request(api['key'], api['secret'], 'GET', '/v1/me/getpositions', {
+    return bitflyer_request(api, 'GET', '/v1/me/getpositions', {
         'product_code': product_code
     })
 
@@ -21,18 +33,18 @@ def bitflyer_send_child_order(api, product_code, order_type, side, size):
     """
     Bitflyer send child order
     """
-    return bitflyer_request(api['key'], api['secret'], 'POST', '/v1/me/sendchildorder', {
+    return bitflyer_request(api, 'POST', '/v1/me/sendchildorder', {
         'product_code': product_code,
         'child_order_type': order_type,
         'side': side,
         'size': size
     })
 
-def bitflyer_request(api_key, api_secret, method, endpoint, parameters):
+def bitflyer_request(api, method, endpoint, parameters):
     """
     Bitflyer request
     """
-    if api_key is None or api_key == '' or api_secret is None or api_secret == '':
+    if api['key'] is None or api['key'] == '' or api['secret'] is None or api['secret'] == '':
         return
     timestamp = str(time.time())
     body = ''
@@ -41,9 +53,9 @@ def bitflyer_request(api_key, api_secret, method, endpoint, parameters):
     else:
         body = '?' + urllib.urlencode(parameters)
     text = timestamp + method + endpoint + body
-    sign = hmac.new(api_secret.encode(), text.encode(), hashlib.sha256).hexdigest()
+    sign = hmac.new(api['secret'].encode(), text.encode(), hashlib.sha256).hexdigest()
     header = {
-        'ACCESS-KEY': api_key,
+        'ACCESS-KEY': api['key'],
         'ACCESS-TIMESTAMP': timestamp,
         'ACCESS-SIGN': sign,
         'Content-Type': 'application/json'

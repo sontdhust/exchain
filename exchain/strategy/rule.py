@@ -39,4 +39,4 @@ def investigate_side(side):
     Investigate side
     """
     is_open_side = 'open' in side
-    return ('last_price', 'MARKET' if is_open_side else 'MARKET')
+    return ('last_price', 'market' if is_open_side else 'market')
