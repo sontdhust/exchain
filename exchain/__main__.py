@@ -12,7 +12,9 @@ from storage import (
 from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import identify_overall_side, check_reversal, investigate_side
+from strategy import identify_overall_side, check_reversal
+
+TRADE_TYPE = 'market'
 
 def main():
     """
@@ -44,13 +46,12 @@ def main():
     overall_side = identify_overall_side(sides, read_config('strategy.rule.consensus_threshold'))
     if overall_side is None or overall_side == 'hold':
         return
-    overall_side_type = investigate_side(overall_side)
     trades = []
     for asset in [a for a in select_assets()]:
         previous_trade = select_previous_trade(a['id'])
         if check_reversal(previous_trade, overall_side):
-            price = points[asset['ticker_id']][overall_side_type[0]]
-            insert_trade(asset['id'], overall_side, price, asset['amount'], overall_side_type[1])
+            price = points[asset['ticker_id']]['last_price']
+            insert_trade(asset['id'], overall_side, price, asset['amount'], TRADE_TYPE)
             if previous_trade is not None:
                 trades.append({
                     'api': asset['api'],
@@ -59,7 +60,7 @@ def main():
                     'price': price,
                     'amount': asset['amount']
                 })
-    execute_trade(trades, overall_side, overall_side_type[1])
+    execute_trade(trades, overall_side, TRADE_TYPE)
     close_database()
 
 def execute_trade(trades, overall_side, overall_type):
