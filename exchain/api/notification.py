@@ -12,13 +12,13 @@ def notify_trades(all_trades, side):
     Notify trades
     """
     grouped_trades = [(u, [{key: t[key] for key in [
-        'exchange', 'pair', 'price'
+        'exchange', 'symbol', 'price'
     ]} for t in all_trades if t['api']['slack_webhook_url'] == u]) for u in set(
         [t['api']['slack_webhook_url'] for t in all_trades]
     )]
     for url, trades in grouped_trades:
         text = '\n'.join([(
-            '*' + t['pair'].upper()
+            '*' + t['symbol']
             + '* (_' + t['exchange'].title() + '_): '
             + format_price(t['price']) + '.'
         ) for t in trades])
