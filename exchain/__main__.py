@@ -34,8 +34,7 @@ def main():
             continue
         side = analyze_macd(
             calculate_macd_histograms(prices)[-read_config('analysis.macd.period'):],
-            read_config('analysis.macd.monotonic_period'),
-            read_config('analysis.macd.movement_period')
+            read_config('analysis.macd.monotonic_period')
         )
         update_ticker(ticker['id'], side, prices[-1]['close'])
         if ticker['priority'] > 0:
