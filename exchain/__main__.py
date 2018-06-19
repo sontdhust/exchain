@@ -50,13 +50,12 @@ def main():
             if check_reversal(previous_trade, overall_side):
                 price = points[asset['ticker_id']]['last_price']
                 insert_trade(asset['id'], overall_side, price, asset['amount'], TRADE_TYPE)
-                if previous_trade is not None:
-                    trades.append({
-                        'api': asset['api'],
-                        'exchange': asset['exchange'],
-                        'symbol': asset['symbol'],
-                        'price': price
-                    })
+                trades.append({
+                    'api': asset['api'],
+                    'exchange': asset['exchange'],
+                    'symbol': asset['symbol'],
+                    'price': price
+                })
         notify_trades(trades, overall_side)
     execute_trades(select_unexecuted_trades())
     close_database()
