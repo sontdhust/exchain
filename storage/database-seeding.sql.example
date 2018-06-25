@@ -1,0 +1,17 @@
+DROP USER IF EXISTS '';
+DROP USER IF EXISTS '';
+GRANT ALL ON `exchain`.* TO ''@'localhost' IDENTIFIED BY '';
+GRANT REPLICATION SLAVE, REPLICATION CLIENT, SELECT ON *.* TO ''@'%' IDENTIFIED BY '';
+FLUSH PRIVILEGES;
+
+USE `exchain`;
+
+INSERT INTO `users` (`name`) VALUES ('');
+
+INSERT INTO `tickers` (`exchange`, `pair`, `symbol`, `priority`) VALUES
+    ('bitfinex', 'btcusd', 'BTCUSD', 1),
+    ('bitfinex', 'ethusd', 'ETHUSD', 1),
+    ('bitfinex', 'xrpusd', 'XRPUSD', 1),
+    ('bitfinex', 'bchusd', 'BCHUSD', 1),
+    ('bitfinex', 'eosusd', 'EOSUSD', 1),
+    ('bitfinex', 'ltcusd', 'LTCUSD', 1);
