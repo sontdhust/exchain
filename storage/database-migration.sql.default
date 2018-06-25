@@ -52,7 +52,9 @@ CREATE TABLE `trades` (
     `price` double(15, 5) NOT NULL COMMENT 'Ticker price',
     `amount` double(15, 5) NOT NULL COMMENT 'Asset amount',
     `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Either `market`, `limit`, `stop`...',
+    `executed` tinyint(1) NOT NULL DEFAULT '0',
     `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `trades_asset_id_foreign` (`asset_id`),
     CONSTRAINT `trades_asset_id_foreign` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`)

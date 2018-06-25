@@ -16,10 +16,15 @@ def bitflyer_trade(api, symbol, overall_type, overall_side, amount):
     order_type = overall_type.upper()
     side = overall_side.split('-')[0].upper()
     positions = bitflyer_get_positions(api, symbol)
+    if positions is None:
+        return False
+    if sum([p['size'] for p in positions if p['side'] == side]) > 0:
+        return True
     size = sum([
         p['size'] for p in positions if p['side'] != side
     ]) + amount
     bitflyer_send_child_order(api, symbol, order_type, side, size)
+    return False
 
 def bitflyer_get_positions(api, product_code):
     """
@@ -45,7 +50,7 @@ def bitflyer_request(api, method, endpoint, parameters):
     Bitflyer request
     """
     if api['key'] is None or api['key'] == '' or api['secret'] is None or api['secret'] == '':
-        return
+        return None
     timestamp = str(time.time())
     body = ''
     if method == 'POST':
