@@ -9,21 +9,23 @@ import hmac
 import hashlib
 import requests
 
-def bitflyer_trade(api, symbol, overall_type, overall_side, amount):
+BUY = 'BUY'
+SELL = 'SELL'
+
+def bitflyer_trade(api, symbol, overall_type, amount):
     """
     Bitflyer trade
     """
     order_type = overall_type.upper()
-    side = overall_side.split('-')[0].upper()
     positions = bitflyer_get_positions(api, symbol)
     if positions is None:
         return False
-    if sum([p['size'] for p in positions if p['side'] == side]) > 0:
+    buy_size = sum([p['size'] for p in positions if p['side'] == BUY])
+    sell_size = sum([p['size'] for p in positions if p['side'] == SELL])
+    size = amount - (buy_size - sell_size)
+    if size == 0:
         return True
-    size = sum([
-        p['size'] for p in positions if p['side'] != side
-    ]) + amount
-    bitflyer_send_child_order(api, symbol, order_type, side, size)
+    bitflyer_send_child_order(api, symbol, order_type, BUY if size > 0 else SELL, abs(size))
     return False
 
 def bitflyer_get_positions(api, product_code):

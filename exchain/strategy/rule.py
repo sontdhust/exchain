@@ -21,10 +21,7 @@ def check_reversal(previous_trade, side):
     """
     Check reversal
     """
-    if side == 'hold':
-        return False
     if previous_trade is None:
         return True
-    previous_position = previous_trade['side'].split('-')[0]
-    position = side.split('-')[0]
-    return previous_position != position
+    previous_side = previous_trade['side']
+    return previous_side != side

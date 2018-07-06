@@ -43,13 +43,14 @@ def main():
             'last_price': prices[-1]['close']
         }
     overall_side = identify_overall_side(sides, read_config('strategy.rule.consensus_threshold'))
-    if overall_side is not None and overall_side != 'hold':
+    if overall_side is not None:
         trades = []
         for asset in [a for a in select_assets()]:
             previous_trade = select_previous_trade(a['id'])
             if check_reversal(previous_trade, overall_side):
                 price = points[asset['ticker_id']]['last_price']
-                insert_trade(asset['id'], overall_side, price, asset['amount'], TRADE_TYPE)
+                amount = 0 if 'hold' in overall_side else asset['amount']
+                insert_trade(asset['id'], overall_side, price, amount, TRADE_TYPE)
                 trades.append({
                     'api': asset['api'],
                     'exchange': asset['exchange'],
@@ -66,10 +67,11 @@ def execute_trades(trades):
     """
     for trade in trades:
         if trade['exchange'] == 'bitflyer':
+            amount = (-1 if 'sell' in trade['side'] else 1) * trade['amount']
             is_executed = bitflyer_trade({
                 'key': trade['api']['bitflyer_api_key'],
                 'secret': trade['api']['bitflyer_api_secret']
-            }, trade['symbol'], trade['type'], trade['side'], trade['amount'])
+            }, trade['symbol'], trade['type'], amount)
             if is_executed:
                 update_trade(trade['id'])
         else:
