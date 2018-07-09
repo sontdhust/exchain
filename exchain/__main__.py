@@ -46,7 +46,7 @@ def main():
     if overall_side is not None:
         trades = []
         for asset in [a for a in select_assets()]:
-            previous_trade = select_previous_trade(a['id'])
+            previous_trade = select_previous_trade(asset['id'])
             if check_reversal(previous_trade, overall_side):
                 price = points[asset['ticker_id']]['last_price']
                 amount = 0 if 'hold' in overall_side else asset['amount']
