@@ -43,7 +43,7 @@ def send_slack_message(webhook_url, text, attachments):
         'Content-Type': 'application/json'
     })
 
-def format_price(price, max_fractional=5):
+def format_price(price, max_fraction=5):
     """
     Format price
     """
@@ -51,7 +51,7 @@ def format_price(price, max_fractional=5):
     if price != 0:
         logarithm = math.log10(price)
         integer = int(logarithm) + (1 if logarithm > 0 else 0)
-    fractional = max_fractional - integer if integer < max_fractional else 0
-    normalized = decimal.Decimal(('{:.' + str(fractional) + 'f}').format(price)).normalize()
+    fraction = max_fraction - integer if integer < max_fraction else 0
+    normalized = decimal.Decimal(('{:.' + str(fraction) + 'f}').format(price)).normalize()
     exponent = normalized.as_tuple()[2]
     return str(normalized if exponent <= 0 else normalized.quantize(1))

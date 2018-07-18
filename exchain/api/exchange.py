@@ -11,6 +11,7 @@ import requests
 
 BUY = 'BUY'
 SELL = 'SELL'
+FRACTION = 2
 
 def bitflyer_trade(api, symbol, overall_type, amount):
     """
@@ -22,7 +23,7 @@ def bitflyer_trade(api, symbol, overall_type, amount):
         return False
     buy_size = sum([p['size'] for p in positions if p['side'] == BUY])
     sell_size = sum([p['size'] for p in positions if p['side'] == SELL])
-    size = amount - (buy_size - sell_size)
+    size = round(amount - (buy_size - sell_size), FRACTION)
     if size == 0:
         return True
     bitflyer_send_child_order(api, symbol, order_type, BUY if size > 0 else SELL, abs(size))
