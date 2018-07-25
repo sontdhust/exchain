@@ -48,7 +48,7 @@ DROP TABLE IF EXISTS `trades`;
 CREATE TABLE `trades` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `asset_id` int(10) unsigned NOT NULL,
-    `side` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Ticker side',
+    `side` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
     `price` double(15, 5) NOT NULL COMMENT 'Ticker price',
     `amount` double(15, 5) NOT NULL COMMENT 'Asset amount',
     `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Either `market`, `limit`, `stop`...',

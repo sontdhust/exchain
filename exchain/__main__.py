@@ -12,7 +12,7 @@ from storage import (
 from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import identify_overall_side, check_reversal
+from strategy import consider_side, check_reversal
 
 TRADE_TYPE = 'market'
 
@@ -21,8 +21,7 @@ def main():
     Main
     """
     connect_database(read_config('storage.database.mysql'))
-    sides = []
-    points = {}
+    tickers = {}
     for ticker in select_tickers():
         prices = fetch_prices(
             ticker['exchange'],
@@ -37,27 +36,32 @@ def main():
             read_config('analysis.macd.monotonic_period')
         )
         update_ticker(ticker['id'], side, prices[-1]['close'])
-        if ticker['priority'] > 0:
-            sides.append(side)
-        points[ticker['id']] = {
-            'last_price': prices[-1]['close']
+        tickers[ticker['id']] = {
+            'priority': ticker['priority'],
+            'side': side,
+            'price': prices[-1]['close']
         }
-    overall_side = identify_overall_side(sides, read_config('strategy.rule.consensus_threshold'))
-    if overall_side is not None:
-        trades = []
-        for asset in [a for a in select_assets()]:
-            previous_trade = select_previous_trade(asset['id'])
-            if check_reversal(previous_trade, overall_side):
-                price = points[asset['ticker_id']]['last_price']
-                amount = 0 if 'hold' in overall_side else asset['amount']
-                insert_trade(asset['id'], overall_side, price, amount, TRADE_TYPE)
-                trades.append({
-                    'api': asset['api'],
-                    'exchange': asset['exchange'],
-                    'symbol': asset['symbol'],
-                    'price': price
-                })
-        notify_trades(trades, overall_side)
+    sides = [t['side'] for t in tickers.values() if t['priority'] > 0]
+    trades = []
+    for asset in [a for a in select_assets()]:
+        previous_trade = select_previous_trade(asset['id'])
+        new_side = consider_side(
+            sides,
+            tickers[asset['ticker_id']]['side'],
+            read_config('strategy.rule.consensus_threshold')
+        )
+        if new_side is not None and check_reversal(previous_trade, new_side):
+            price = tickers[asset['ticker_id']]['price']
+            amount = 0 if 'hold' in new_side else asset['amount']
+            insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)
+            trades.append({
+                'slack_webhook_url': asset['api']['slack_webhook_url'],
+                'exchange': asset['exchange'],
+                'symbol': asset['symbol'],
+                'side': new_side,
+                'price': price
+            })
+    notify_trades(trades)
     execute_trades(select_unexecuted_trades())
     close_database()
 

@@ -7,27 +7,23 @@ import math
 import decimal
 import requests
 
-def notify_trades(all_trades, side):
+def notify_trades(all_trades):
     """
     Notify trades
     """
-    grouped_trades = [(u, [{key: t[key] for key in [
-        'exchange', 'symbol', 'price'
-    ]} for t in all_trades if t['api']['slack_webhook_url'] == u]) for u in set(
-        [t['api']['slack_webhook_url'] for t in all_trades]
-    )]
-    for url, trades in grouped_trades:
-        text = '\n'.join([(
-            '*' + t['symbol']
-            + '* (_' + t['exchange'].title() + '_): '
-            + format_price(t['price']) + '.'
-        ) for t in trades])
-        send_slack_message(url, '', [{
-            'fallback': side.title() + '.',
-            'text': text,
-            'color': 'warning' if 'hold' in side else ('good' if 'buy' in side else 'danger'),
-            'mrkdwn_in': ['text']
-        }])
+    for url, grouped_trades in group_elements(all_trades, 'slack_webhook_url'):
+        for side, trades in group_elements(grouped_trades, 'side'):
+            text = '\n'.join([(
+                '*' + t['symbol']
+                + '* (_' + t['exchange'].title() + '_): '
+                + format_price(t['price']) + '.'
+            ) for t in trades])
+            send_slack_message(url, '', [{
+                'fallback': side.title() + '.',
+                'text': text,
+                'color': 'warning' if 'hold' in side else ('good' if 'buy' in side else 'danger'),
+                'mrkdwn_in': ['text']
+            }])
 
 def send_slack_message(webhook_url, text, attachments):
     """
@@ -42,6 +38,16 @@ def send_slack_message(webhook_url, text, attachments):
     }), {
         'Content-Type': 'application/json'
     })
+
+def group_elements(array, key):
+    """
+    Group elements
+    """
+    return [(main_key, [{other_key: e[other_key] for other_key in (
+        set(e.keys()) - set([key])
+    )} for e in array if e[key] == main_key]) for main_key in set(
+        [e[key] for e in array]
+    )]
 
 def format_price(price, max_fraction=5):
     """
