@@ -52,7 +52,7 @@ def main():
         )
         if new_side is not None and check_reversal(previous_trade, new_side):
             price = tickers[asset['ticker_id']]['price']
-            amount = 0 if 'hold' in new_side else asset['amount']
+            amount = 0 if new_side == 'hold' else asset['amount']
             insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)
             trades.append({
                 'slack_webhook_url': asset['api']['slack_webhook_url'],
@@ -71,7 +71,7 @@ def execute_trades(trades):
     """
     for trade in trades:
         if trade['exchange'] == 'bitflyer':
-            amount = (-1 if 'sell' in trade['side'] else 1) * trade['amount']
+            amount = (-1 if trade['side'] == 'sell' else 1) * trade['amount']
             is_executed = bitflyer_trade({
                 'key': trade['api']['bitflyer_api_key'],
                 'secret': trade['api']['bitflyer_api_secret']

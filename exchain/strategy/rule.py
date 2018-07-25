@@ -14,17 +14,14 @@ def consider_side(sides, side, consensus_threshold):
             and most_common[0][1] > most_common[1][1]
             and most_common[0][1] >= int(len(sides) * consensus_threshold)):
         overall_side = most_common[0][0]
-        if 'hold' in side or side == overall_side:
+        if side == 'hold' or side == overall_side:
             return overall_side
         else:
-            return side if 'hold' in overall_side else 'hold'
+            return side if overall_side == 'hold' else 'hold'
     else:
-        if 'buy' in side:
-            count = len([s for s in sides if 'buy' in s or 'hold' in s])
-            return 'buy' if count >= int(len(sides) * consensus_threshold) else None
-        elif 'sell' in side:
-            count = len([s for s in sides if 'sell' in s or 'hold' in s])
-            return 'sell' if count >= int(len(sides) * consensus_threshold) else None
+        if side == 'buy' or side == 'sell':
+            count = len([s for s in sides if s == side or s == 'hold'])
+            return side if count >= int(len(sides) * consensus_threshold) else None
         else:
             return None
 
