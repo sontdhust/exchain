@@ -12,7 +12,7 @@ from storage import (
 from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import consider_side, check_reversal
+from strategy import consider_side, check_side_change
 
 TRADE_TYPE = 'market'
 
@@ -48,9 +48,10 @@ def main():
         new_side = consider_side(
             sides,
             tickers[asset['ticker_id']]['side'],
+            previous_trade['side'] if previous_trade is not None else None,
             read_config('strategy.rule.consensus_threshold')
         )
-        if new_side is not None and check_reversal(previous_trade, new_side):
+        if new_side is not None and check_side_change(previous_trade, new_side):
             price = tickers[asset['ticker_id']]['price']
             amount = 0 if new_side == 'hold' else asset['amount']
             insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)

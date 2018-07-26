@@ -4,32 +4,30 @@ Rule
 
 from collections import Counter
 
-def consider_side(sides, side, consensus_threshold):
+def consider_side(sides, side, previous_side, consensus_threshold):
     """
     Consider side
     """
+    threshold = int(len(sides) * consensus_threshold)
     most_common = Counter(sides).most_common(2)
-    if (len(most_common) == 1
-            or len(most_common) > 1
-            and most_common[0][1] > most_common[1][1]
-            and most_common[0][1] >= int(len(sides) * consensus_threshold)):
-        overall_side = most_common[0][0]
-        if side == 'hold' or side == overall_side:
-            return overall_side
-        else:
-            return side if overall_side == 'hold' else 'hold'
+    if (most_common[0][1] >= threshold
+            and (side == 'hold' or side == most_common[0][0])):
+        return most_common[0][0]
     else:
-        if side == 'buy' or side == 'sell':
-            count = len([s for s in sides if s == side or s == 'hold'])
-            return side if count >= int(len(sides) * consensus_threshold) else None
-        else:
-            return None
+        return 'hold' if check_reversal(previous_side, side) else None
 
-def check_reversal(previous_trade, side):
+def check_side_change(previous_trade, side):
     """
-    Check reversal
+    Check side change
     """
     if previous_trade is None:
         return True
     previous_side = previous_trade['side']
     return previous_side != side
+
+def check_reversal(previous_side, side):
+    """
+    Check reversal
+    """
+    return (previous_side != None and previous_side != 'hold'
+            and side != 'hold' and previous_side != side)
