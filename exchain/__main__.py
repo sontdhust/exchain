@@ -12,7 +12,7 @@ from storage import (
 from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import consider_side, check_side_change
+from strategy import decide_side, check_side_change
 
 TRADE_TYPE = 'market'
 
@@ -43,9 +43,9 @@ def main():
         }
     sides = [t['side'] for t in tickers.values() if t['priority'] > 0]
     trades = []
-    for asset in [a for a in select_assets()]:
+    for asset in select_assets():
         previous_trade = select_previous_trade(asset['id'])
-        new_side = consider_side(
+        new_side = decide_side(
             sides,
             tickers[asset['ticker_id']]['side'],
             previous_trade['side'] if previous_trade is not None else None,
@@ -53,7 +53,7 @@ def main():
         )
         if new_side is not None and check_side_change(previous_trade, new_side):
             price = tickers[asset['ticker_id']]['price']
-            amount = 0 if new_side == 'hold' else asset['amount']
+            amount = 0 if new_side == 'hold' else asset['size']
             insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)
             trades.append({
                 'slack_webhook_url': asset['api']['slack_webhook_url'],

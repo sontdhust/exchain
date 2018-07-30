@@ -4,9 +4,9 @@ Rule
 
 from collections import Counter
 
-def consider_side(sides, side, previous_side, consensus_threshold):
+def decide_side(sides, side, previous_side, consensus_threshold):
     """
-    Consider side
+    Decide side
     """
     threshold = int(len(sides) * consensus_threshold)
     most_common = Counter(sides).most_common(2)
