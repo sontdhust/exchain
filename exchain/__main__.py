@@ -12,7 +12,7 @@ from storage import (
 from api import fetch_prices, notify_trades, bitflyer_trade
 from indicator import calculate_macd_histograms
 from analysis import analyze_macd
-from strategy import decide_side, check_side_change
+from strategy import decide_side, check_side_change, need_to_delay
 
 TRADE_TYPE = 'market'
 
@@ -51,7 +51,9 @@ def main():
             previous_trade['side'] if previous_trade is not None else None,
             read_config('strategy.rule.consensus_threshold')
         )
-        if new_side is not None and check_side_change(previous_trade, new_side):
+        if (new_side is not None
+                and check_side_change(previous_trade, new_side)
+                and not need_to_delay(previous_trade, read_config('strategy.rule.delay'))):
             price = tickers[asset['ticker_id']]['price']
             amount = 0 if new_side == 'hold' else asset['size']
             insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)

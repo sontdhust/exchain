@@ -2,7 +2,7 @@
 Database
 """
 
-import datetime
+from datetime import datetime
 import json
 import mysql.connector
 
@@ -85,14 +85,17 @@ def select_previous_trade(asset_id):
     Select previous trade
     """
     query = (
-        'SELECT side '
+        'SELECT side, created_at '
         'FROM trades '
         'WHERE asset_id = %(asset_id)s '
         'ORDER BY id DESC '
         'LIMIT 1'
     )
     DATABASE['cursor'].execute(query, {'asset_id': asset_id})
-    result = [{'side': r[0]} for r in DATABASE['cursor'].fetchall()]
+    result = [{
+        'side': r[0],
+        'created_at': r[1]
+    } for r in DATABASE['cursor'].fetchall()]
     if len(result) == 0:
         return None
     else:
@@ -174,4 +177,4 @@ def get_current_datetime():
     """
     Get current datetime
     """
-    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
