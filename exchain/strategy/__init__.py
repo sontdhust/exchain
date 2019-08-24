@@ -2,4 +2,4 @@
 Strategy
 """
 
-from strategy.rule import identify_overall_side, check_reversal
+from strategy.rule import decide_side, check_side_change

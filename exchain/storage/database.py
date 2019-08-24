@@ -62,7 +62,7 @@ def select_assets():
     Select assets
     """
     query = (
-        'SELECT assets.id, tickers.id, api, exchange, symbol, amount '
+        'SELECT assets.id, tickers.id, api, exchange, symbol, size '
         'FROM assets '
         'JOIN users ON assets.user_id = users.id '
         'JOIN tickers ON assets.ticker_id = tickers.id '
@@ -76,7 +76,7 @@ def select_assets():
         'api': load_api(r[2]),
         'exchange': r[3],
         'symbol': r[4],
-        'amount': r[5]
+        'size': r[5]
     } for r in DATABASE['cursor'].fetchall()]
     return result
 
