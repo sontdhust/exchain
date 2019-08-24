@@ -30,22 +30,13 @@ exchain# dpkg-reconfigure tzdata
 exchain# pip install mysql-connector==2.1.6 requests
 ```
 
-### 2. Configure
-```
-exchain# cp ./storage/config.json.example ./storage/config.json
-exchain# cp ./storage/database-migration.sql.default ./storage/database-migration.sql
-exchain# cp ./storage/database-seeding.sql.example ./storage/database-seeding.sql
-exchain# vi ./storage/config.json
-exchain# vi ./storage/database-seeding.sql
-```
-
-### 3. Import data
+### 2. Import data
 ```
 exchain# mysql -uroot < ./storage/database-migration.sql
 exchain# mysql -uroot < ./storage/database-seeding.sql
 ```
 
-### 4. Run
+### 3. Run
 ```
 exchain# crontab -e
 ```

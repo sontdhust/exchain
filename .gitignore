@@ -2,8 +2,8 @@
 *.pyc
 
 # Project ignore files
-storage/*
-!storage/*.default
-!storage/*.example
+storage/*.default
+storage/*.example
+storage/logs
 
 /tmp

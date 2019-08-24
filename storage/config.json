@@ -1,16 +1,16 @@
 {
     "api": {
         "data_fetcher": {
-            "interval": 180,
+            "interval": 14400,
             "period": 300
         }
     },
     "storage": {
         "database": {
             "mysql": {
-                "host": "",
-                "user": "",
-                "password": "",
+                "host": "localhost",
+                "user": "trader",
+                "password": "asperitas",
                 "database": "exchain"
             }
         }
@@ -18,7 +18,7 @@
     "analysis": {
         "macd": {
             "period": 120,
-            "monotonic_period": 1
+            "monotonic_period": 2
         }
     },
     "strategy": {
