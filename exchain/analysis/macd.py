@@ -12,10 +12,12 @@ def analyze_macd(histograms, monotonic_period):
     macds = [h['macd'] for h in histograms]
     signals = [h['signal'] for h in histograms]
     divergences = [h['macd'] - h['signal'] for h in histograms]
+    is_crossover = divergences[-1] * divergences[-2] < 0 or divergences[-1] * divergences[-3] < 0
     is_upside = divergences[-1] > 0
     monotonicity = check_monotonicity(macds[-monotonic_period:])
     if (monotonicity is not None
             and check_monotonicity(signals[-monotonic_period:]) == monotonicity
+            and is_crossover
             and (monotonicity is INCREASING) == is_upside):
         return 'buy' if is_upside else 'sell'
     return 'hold'
