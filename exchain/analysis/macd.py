@@ -17,10 +17,12 @@ def analyze_macd(histograms, monotonic_period):
     monotonicity = check_monotonicity(macds[-monotonic_period:])
     if (monotonicity is not None
             and check_monotonicity(signals[-monotonic_period:]) == monotonicity
-            and is_crossover
             and (monotonicity is INCREASING) == is_upside):
-        return 'buy' if is_upside else 'sell'
-    return 'hold'
+        if is_crossover:
+            return 'buy' if is_upside else 'sell'
+        else:
+            return 'hold'
+    return 'close'
 
 def check_monotonicity(period):
     """

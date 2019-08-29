@@ -51,11 +51,11 @@ def main():
             previous_trade['side'] if previous_trade is not None else None,
             read_config('strategy.rule.consensus_threshold')
         )
-        if (new_side is not None
+        if (new_side is not 'hold'
                 and check_side_change(previous_trade, new_side)
                 and not need_to_delay(previous_trade, read_config('strategy.rule.delay'))):
             price = tickers[asset['ticker_id']]['price']
-            amount = 0 if new_side == 'hold' else asset['size']
+            amount = 0 if new_side == 'close' else asset['size']
             insert_trade(asset['id'], new_side, price, amount, TRADE_TYPE)
             trades.append({
                 'slack_webhook_url': asset['api']['slack_webhook_url'],
