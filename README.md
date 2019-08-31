@@ -27,7 +27,7 @@ exchain# vi /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
 exchain# service mysql restart --server-id=1 --log-bin --binlog-format=row --binlog-do-db=exchain
 exchain# dpkg-reconfigure tzdata
-exchain# pip install mysql-connector==2.1.6 requests
+exchain# pip install mysql-connector==2.1.7 requests
 ```
 
 ### 2. Import data

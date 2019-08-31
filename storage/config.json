@@ -23,7 +23,8 @@
     },
     "strategy": {
         "rule": {
-            "consensus_threshold": 1
+            "consensus_threshold": 1,
+            "delay": 0
         }
     }
 }

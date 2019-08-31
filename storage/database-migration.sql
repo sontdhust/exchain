@@ -22,7 +22,7 @@ CREATE TABLE `tickers` (
     `pair` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
     `symbol` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
     `priority` double(15, 5) NOT NULL COMMENT 'A higher value indicates a higher priority. `0` is ignored.',
-    `side` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'hold' COMMENT 'Either `hold`, `buy`, `sell`',
+    `side` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'close' COMMENT 'Either `buy`, `sell`, `hold`, `close`',
     `price` double(15, 5) NOT NULL DEFAULT '0.00000',
     `updated_at` timestamp NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
